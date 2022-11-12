@@ -1,5 +1,4 @@
 import Letter from 'components/Letter';
-import Image from 'next/image';
 
 export enum BONUS {
   NONE = '/blank.jpg',
@@ -21,10 +20,10 @@ export type TileProps = {
 export default function Tile({ bonus = BONUS.NONE, letter, onLetterDrop, x, y }: TileProps) {
 
   return (
-    <div className="border-black border" onClick={() => onLetterDrop(x, y)}>
+    <div className='flex items-center justify-center' onClick={() => onLetterDrop(x, y)}>
       {letter
         ? letter
-        : <Image src={bonus} alt={''} width={50} height={50} />}
+        : <img src={bonus} width={'46px'} height={'50px'}></img>}
     </div>
   );
 }

@@ -1,3 +1,4 @@
+import Letter from 'components/Letter';
 import Tile, { BONUS } from 'components/Tile';
 
 type ReturnedTile = ReturnType<typeof Tile>;
@@ -31,8 +32,8 @@ export function obtainBoardTiles(onLetterDrop: Function): ReturnedTile[][] {
       <Tile key={key++} x={2} y={1} onLetterDrop={onLetterDrop} />,
       <Tile key={key++} x={3} y={1} onLetterDrop={onLetterDrop} />,
       <Tile key={key++} x={4} y={1} onLetterDrop={onLetterDrop} />,
-      <Tile key={key++} x={5} y={1} onLetterDrop={onLetterDrop} bonus={BONUS.LSx3} />,
-      <Tile key={key++} x={6} y={1} onLetterDrop={onLetterDrop} />,
+      <Tile key={key++} x={5} y={1} onLetterDrop={onLetterDrop} bonus={BONUS.LSx3} letter={<Letter char='K' value={3} draggable />} />,
+      <Tile key={key++} x={6} y={1} onLetterDrop={onLetterDrop} letter={<Letter char='Z' value={8} draggable />} />,
       <Tile key={key++} x={7} y={1} onLetterDrop={onLetterDrop} />,
       <Tile key={key++} x={8} y={1} onLetterDrop={onLetterDrop} />,
       <Tile key={key++} x={9} y={1} onLetterDrop={onLetterDrop} bonus={BONUS.LSx3} />,
@@ -50,7 +51,7 @@ export function obtainBoardTiles(onLetterDrop: Function): ReturnedTile[][] {
       <Tile key={key++} x={3} y={2} onLetterDrop={onLetterDrop} />,
       <Tile key={key++} x={4} y={2} onLetterDrop={onLetterDrop} />,
       <Tile key={key++} x={5} y={2} onLetterDrop={onLetterDrop} />,
-      <Tile key={key++} x={6} y={2} onLetterDrop={onLetterDrop} bonus={BONUS.LSx2} />,
+      <Tile key={key++} x={6} y={2} onLetterDrop={onLetterDrop} bonus={BONUS.LSx2} letter={<Letter char='M' value={3} draggable />} />,
       <Tile key={key++} x={7} y={2} onLetterDrop={onLetterDrop} />,
       <Tile key={key++} x={8} y={2} onLetterDrop={onLetterDrop} bonus={BONUS.LSx2} />,
       <Tile key={key++} x={9} y={2} onLetterDrop={onLetterDrop} />,

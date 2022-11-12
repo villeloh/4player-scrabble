@@ -1,10 +1,11 @@
 import type { NextPage } from 'next';
 import Head from 'next/head';
-import Image from 'next/image';
 import { useState } from 'react';
 // import TileObj, { Bonus } from 'model/TileObj';
 import { obtainBoardTiles } from 'utils/Utils';
 import Board from 'components/Board';
+import Rack from 'components/Rack';
+import Letter from 'components/Letter';
 
 const Game: NextPage = () => {
 
@@ -17,7 +18,8 @@ const Game: NextPage = () => {
 
   const tiles = obtainBoardTiles(onLetterDrop);
 
-  const [letters, setLetters] = useState([]);
+  const [boardLetters, setBoardLetters] = useState([]);
+  const [ownLetters, setOwnLetters] = useState([<Letter char={'A'} value={1} draggable />, <Letter char={'Q'} value={10} draggable />, <Letter char={'A'} value={1} draggable />, <Letter char={'Q'} value={10} draggable />, <Letter char={'A'} value={1} draggable />, <Letter char={'Q'} value={10} draggable />, <Letter char={'A'} value={1} draggable />]);
 
 
   return (
@@ -27,6 +29,7 @@ const Game: NextPage = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <Board>{tiles}</Board>
+      <Rack color={'#2e9bd5'}>{ownLetters}</Rack>
     </div>
   )
 }
