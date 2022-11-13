@@ -14,7 +14,7 @@ export default function Board({ children }: BoardProps) {
       <img className='w-[45px] h-[750px]' src={rowLegendPath}></img>
       <div className='flex flex-col items-center h-fit w-fit'>
         <img className='w-[690px] h-[35px]' src={columnLegendPath}></img>
-        <div className='grid gap-0 my-2 mx-2' style={{ gridTemplateColumns: 'repeat(15, 46px)' }}>
+        <div className='grid gap-0 my-2 mx-2 border-2 border-black' style={{ gridTemplateColumns: 'repeat(15, 46px)' }}>
           {children}
         </div>
         <img className='w-[690px] h-[35px]' src={columnLegendPath}></img>
@@ -22,4 +22,4 @@ export default function Board({ children }: BoardProps) {
       <img className='w-[45px] h-[750px]' src={rowLegendPath}></img>
     </div>
   );
-}
+};

@@ -17,4 +17,4 @@ export default function Rack({ color, children }: RackProps) {
       </div>
     </div>
   );
-}
+};

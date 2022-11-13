@@ -26,4 +26,4 @@ export default function Tile({ bonus = BONUS.NONE, letter, onLetterDrop, x, y }:
         : <img src={bonus} width={'46px'} height={'50px'}></img>}
     </div>
   );
-}
+};
