@@ -1,4 +1,4 @@
-import Letter from 'components/Letter';
+import { initLetters } from './Init';
 import { useState, MouseEvent } from 'react';
 
 export function useMouseMove() {
@@ -19,14 +19,28 @@ export function useMouseMove() {
 
 export function useLetterPouch() {
 
-  const [letters, setLetters] = useState([]);
+  const [letterPouch, setLetterPouch] = useState(initLetters());
 
-  const takeLetter = () => {
+  const takeRandomLetters = (amount: number) => {
 
+    const indices = new Set<number>();
 
+    // ensure no duplicate indices
+    while (indices.size < amount) {
+
+      indices.add(Math.floor(Math.random() * letterPouch.length));
+    }
+
+    const letters = Array.from(indices).map(index => { return letterPouch[index] });
+
+    // remove the chosen letters from the pouch
+    setLetterPouch([...letterPouch.filter((_, index) => { return !indices.has(index) })]);
+
+    return letters;
   };
 
   return {
-    letters
+    letterPouch,
+    takeRandomLetters
   };
 };

@@ -1,11 +1,13 @@
 import Tile, { BONUS } from 'components/Tile';
+import LetterObj from 'model/LetterObj';
 
 type ReturnedTile = ReturnType<typeof Tile>;
 
-export function obtainBoardTiles(onLetterDrop: Function): ReturnedTile[][] {
+export function initBoardTiles(onLetterDrop: Function): ReturnedTile[][] {
 
   let key = 1;
 
+  // TODO: store them as JS objects maybe...
   return [
     [
       <Tile key={key++} x={0} y={0} onLetterDrop={onLetterDrop} bonus={BONUS.WSx3} />,
@@ -277,4 +279,138 @@ export function obtainBoardTiles(onLetterDrop: Function): ReturnedTile[][] {
       <Tile key={key++} x={14} y={14} onLetterDrop={onLetterDrop} bonus={BONUS.WSx3} />
     ]
   ];
-}
+};
+
+export function initLetters(): LetterObj[] {
+
+  let id = 1;
+
+  return [
+    new LetterObj(id++, 'A', 1),
+    new LetterObj(id++, 'A', 1),
+    new LetterObj(id++, 'A', 1),
+    new LetterObj(id++, 'A', 1),
+    new LetterObj(id++, 'A', 1),
+    new LetterObj(id++, 'A', 1),
+    new LetterObj(id++, 'A', 1),
+    new LetterObj(id++, 'A', 1),
+    new LetterObj(id++, 'A', 1),
+
+    new LetterObj(id++, 'B', 3),
+    new LetterObj(id++, 'B', 3),
+
+    new LetterObj(id++, 'C', 3),
+    new LetterObj(id++, 'C', 3),
+
+    new LetterObj(id++, 'D', 2),
+    new LetterObj(id++, 'D', 2),
+    new LetterObj(id++, 'D', 2),
+    new LetterObj(id++, 'D', 2),
+
+    new LetterObj(id++, 'E', 1),
+    new LetterObj(id++, 'E', 1),
+    new LetterObj(id++, 'E', 1),
+    new LetterObj(id++, 'E', 1),
+    new LetterObj(id++, 'E', 1),
+    new LetterObj(id++, 'E', 1),
+    new LetterObj(id++, 'E', 1),
+    new LetterObj(id++, 'E', 1),
+    new LetterObj(id++, 'E', 1),
+    new LetterObj(id++, 'E', 1),
+    new LetterObj(id++, 'E', 1),
+    new LetterObj(id++, 'E', 1),
+
+    new LetterObj(id++, 'F', 4),
+    new LetterObj(id++, 'F', 4),
+
+    new LetterObj(id++, 'G', 3),
+    new LetterObj(id++, 'G', 3),
+    new LetterObj(id++, 'G', 3),
+
+    new LetterObj(id++, 'H', 4),
+    new LetterObj(id++, 'H', 4),
+
+    new LetterObj(id++, 'I', 1),
+    new LetterObj(id++, 'I', 1),
+    new LetterObj(id++, 'I', 1),
+    new LetterObj(id++, 'I', 1),
+    new LetterObj(id++, 'I', 1),
+    new LetterObj(id++, 'I', 1),
+    new LetterObj(id++, 'I', 1),
+    new LetterObj(id++, 'I', 1),
+    new LetterObj(id++, 'I', 1),
+
+    new LetterObj(id++, 'J', 9),
+
+    new LetterObj(id++, 'K', 5),
+
+    new LetterObj(id++, 'L', 1),
+    new LetterObj(id++, 'L', 1),
+    new LetterObj(id++, 'L', 1),
+    new LetterObj(id++, 'L', 1),
+
+    new LetterObj(id++, 'M', 3),
+    new LetterObj(id++, 'M', 3),
+
+    new LetterObj(id++, 'N', 1),
+    new LetterObj(id++, 'N', 1),
+    new LetterObj(id++, 'N', 1),
+    new LetterObj(id++, 'N', 1),
+    new LetterObj(id++, 'N', 1),
+    new LetterObj(id++, 'N', 1),
+
+    new LetterObj(id++, 'O', 1),
+    new LetterObj(id++, 'O', 1),
+    new LetterObj(id++, 'O', 1),
+    new LetterObj(id++, 'O', 1),
+    new LetterObj(id++, 'O', 1),
+    new LetterObj(id++, 'O', 1),
+    new LetterObj(id++, 'O', 1),
+    new LetterObj(id++, 'O', 1),
+
+    new LetterObj(id++, 'P', 3),
+    new LetterObj(id++, 'P', 3),
+
+    new LetterObj(id++, 'Q', 10),
+
+    new LetterObj(id++, 'R', 1),
+    new LetterObj(id++, 'R', 1),
+    new LetterObj(id++, 'R', 1),
+    new LetterObj(id++, 'R', 1),
+    new LetterObj(id++, 'R', 1),
+    new LetterObj(id++, 'R', 1),
+
+    new LetterObj(id++, 'S', 1),
+    new LetterObj(id++, 'S', 1),
+    new LetterObj(id++, 'S', 1),
+    new LetterObj(id++, 'S', 1),
+
+    new LetterObj(id++, 'T', 1),
+    new LetterObj(id++, 'T', 1),
+    new LetterObj(id++, 'T', 1),
+    new LetterObj(id++, 'T', 1),
+    new LetterObj(id++, 'T', 1),
+    new LetterObj(id++, 'T', 1),
+
+    new LetterObj(id++, 'U', 1),
+    new LetterObj(id++, 'U', 1),
+    new LetterObj(id++, 'U', 1),
+    new LetterObj(id++, 'U', 1),
+
+    new LetterObj(id++, 'V', 4),
+    new LetterObj(id++, 'V', 4),
+
+    new LetterObj(id++, 'W', 4),
+    new LetterObj(id++, 'W', 4),
+
+    new LetterObj(id++, 'X', 8),
+
+    new LetterObj(id++, 'Y', 4),
+    new LetterObj(id++, 'Y', 4),
+
+    new LetterObj(id++, 'Z', 10),
+
+    new LetterObj(id++, '', 0),
+    new LetterObj(id++, '', 0)
+  ];
+};

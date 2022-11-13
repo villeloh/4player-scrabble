@@ -12,15 +12,15 @@ export enum BONUS {
 export type TileProps = {
   bonus?: BONUS;
   letter?: ReturnType<typeof Letter>; // fix this bs somehow
-  onLetterDrop: Function;
+  handleClick: Function;
   x: number;
   y: number;
 };
 
-export default function Tile({ bonus = BONUS.NONE, letter, onLetterDrop, x, y }: TileProps) {
+export default function Tile({ bonus = BONUS.NONE, letter, handleClick, x, y }: TileProps) {
 
   return (
-    <div className='flex items-center justify-center' onClick={() => onLetterDrop(x, y)}>
+    <div className='flex items-center justify-center' onClick={() => handleClick(x, y)}>
       {letter
         ? letter
         : <img src={bonus} width={'46px'} height={'50px'}></img>}
