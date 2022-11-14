@@ -10,8 +10,6 @@ type RackProps = {
 
 export default function Rack({ color, children, handleClick }: RackProps) {
 
-  console.log(color);
-
   return (
     <div className="flex flex-row items-center justify-center mt-2">
       <div className="bg-sky-800 w-fit h-fit items-center justify-center rounded-md">
