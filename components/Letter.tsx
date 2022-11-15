@@ -2,14 +2,14 @@ import LetterObj from "model/LetterObj";
 
 interface LetterProps {
   letterObj: LetterObj;
-  handleClick: Function;
+  handleClick?: Function;
 }
 
 export default function Letter({ letterObj, handleClick }: LetterProps) {
 
   const clickIfClickable = () => {
 
-    if (letterObj.isClickable) handleClick(letterObj);
+    if (letterObj.isClickable && handleClick) handleClick(letterObj);
   };
 
   return (

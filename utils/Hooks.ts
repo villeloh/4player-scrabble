@@ -26,13 +26,13 @@ export function useTiles() {
 
   const [tiles, setTiles] = useState(initTiles());
 
-  const dropLetter = (clickedTile: TileObj, letterObj: LetterObj) => {
+  const dropLetterOn = (clickedTile: TileObj, letterObj: LetterObj) => {
 
     // highly inefficient... It would be better to use coordinate (x,y) to alter 
     // the state and spread the array of arrays in the set method, but the correct syntax escapes me atm
-    const newState = tiles.map((row) => {
+    const newTiles = tiles.map(row => {
 
-      return row.map((tileObj) => {
+      return row.map(tileObj => {
         if (clickedTile.id === tileObj.id) {
           return new TileObj(tileObj.id, tileObj.x, tileObj.y, tileObj.bonus, letterObj);
         } else {
@@ -40,37 +40,36 @@ export function useTiles() {
         }
       });
     });
-    setTiles(newState);
+    setTiles(newTiles);
   };
 
-  const pickUpLetter = (clickedTile: TileObj) => {
+  const pickUpLetterFrom = (clickedTile: TileObj) => {
 
-    let letter: LetterObj | undefined = undefined;
+    if (!clickedTile.letter) return;
 
     // again, array spread syntax error prevents efficiency
-    const newState = tiles.map((row) => {
+    const newTiles = tiles.map(row => {
 
-      return row.map((tileObj) => {
+      return row.map(tileObj => {
         if (tileObj.id === clickedTile.id && tileObj.letter) {
-          letter = clickedTile.letter!;
           return new TileObj(tileObj.id, tileObj.x, tileObj.y, tileObj.bonus);
         } else {
           return tileObj;
         }
       });
     });
-    setTiles(newState);
-    return letter;
+    setTiles(newTiles);
+    return clickedTile.letter;
   };
 
-  return { tiles, dropLetter, pickUpLetter };
+  return { tiles, dropLetterOn, pickUpLetterFrom };
 };
 
 export function useLetterPouch() {
 
   const [letterPouch, setLetterPouch] = useState(initLetters());
 
-  const takeRandomLetters = (amount: number) => {
+  const takeLettersFromPouch = (amount: number) => {
 
     if (amount > letterPouch.length) {
       amount = letterPouch.length;
@@ -84,41 +83,57 @@ export function useLetterPouch() {
       indices.add(Math.floor(Math.random() * letterPouch.length));
     }
 
-    const letters = Array.from(indices).map(index => { return letterPouch[index] });
+    const letters = Array.from(indices).map(index => { return letterPouch[index]; });
 
     // remove the chosen letters from the pouch
-    setLetterPouch([...letterPouch.filter((_, index) => { return !indices.has(index) })]);
+    setLetterPouch([...letterPouch.filter((_, index) => { return !indices.has(index); })]);
 
     return letters;
   };
 
+  // used when exchanging letters
+  const putLettersInPouch = (letters: LetterObj[]) => {
+
+    setLetterPouch([...letterPouch, ...letters]);
+  };
+
   return {
     letterPouch,
-    takeRandomLetters
+    takeLettersFromPouch,
+    putLettersInPouch
   };
 };
 
-export function useRack(letterPouch: LetterObj[], takeRandomLetters: (amount: number) => LetterObj[]) {
+// passing references to other stateful objects to the hook seems like bad form; think of other solutions
+export function useRack(
+  letterPouch: LetterObj[],
+  takeLettersFromPouch: (amount: number) => LetterObj[],
+  putLettersInPouch: (letters: LetterObj[]) => void) {
 
   const capacity = 7;
 
-  // infinite rerender loop if we fill the array here with takeRandomLetters(), so it's empty to begin with
+  // infinite rerender loop if we fill the array here with takeLettersFromPouch(), so it's empty to begin with
   const [rack, setRack] = useState<LetterObj[]>([]);
 
   const setRackLetters = (letters: LetterObj[]) => {
 
-    // set isClickable and isRacked to true
+    // set isClickable to true on the immutable LetterObj
     setRack([...letters.map(letter => {
-      return new LetterObj(letter.id, letter.char, letter.value, true, true, false)
+      return new LetterObj(letter.id, letter.char, letter.value, true, false);
     })]);
+  };
+
+  const removeRackLetter = (letterObj: LetterObj) => {
+
+    setRackLetters(rack.filter(letter => { return letter.id !== letterObj.id }));
   };
 
   const refillRack = () => {
     const amountToDraw = capacity - rack.length;
-    setRackLetters([...rack, ...takeRandomLetters(amountToDraw)]);
+    setRackLetters([...rack, ...takeLettersFromPouch(amountToDraw)]);
   };
 
-  const exchangeLetters = (selectedLetters: [LetterObj]) => {
+  const exchangeRackLetters = (selectedLetters: [LetterObj]) => {
 
     // Game Rule: can only exchange letters if the pouch has > 7 left
     if (letterPouch.length <= capacity) return;
@@ -129,14 +144,16 @@ export function useRack(letterPouch: LetterObj[], takeRandomLetters: (amount: nu
         return letterObj.id !== selectedLetterObj.id
       })
     })]);
-    const newLetters = takeRandomLetters(selectedLetters.length);
+    const newLetters = takeLettersFromPouch(selectedLetters.length);
+    putLettersInPouch(selectedLetters); // return them to the pouch
     setRackLetters([...rack, ...newLetters]);
   };
 
   return {
     rack,
+    removeRackLetter,
     setRackLetters,
     refillRack,
-    exchangeLetters
+    exchangeRackLetters
   };
 };
