@@ -1,11 +1,11 @@
 import { useEffect, useRef } from "react";
 import Letter from "./Letter";
 
-interface CursorProps {
-  children?: ReturnType<typeof Letter>,
-  mouseX: number,
-  mouseY: number
-}
+type CursorProps = {
+  children?: ReturnType<typeof Letter>;
+  mouseX: number;
+  mouseY: number;
+};
 
 export default function Cursor({ children, mouseX, mouseY }: CursorProps) {
 

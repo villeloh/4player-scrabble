@@ -4,12 +4,14 @@ import LetterObj from "./LetterObj";
 export default class PlayerObj {
 
   readonly id: number;
+  readonly name: string;
   private _score: number = 0;
   private _hasTurn: boolean;
   private _letters: LetterObj[];
 
-  constructor(id: number, hasTurn: boolean = false, letters: LetterObj[]) {
+  constructor(id: number, name: string = `Player ${id}`, hasTurn: boolean = false, letters: LetterObj[]) {
     this.id = id;
+    this.name = name;
     this._hasTurn = hasTurn;
     this._letters = letters;
   }
@@ -22,9 +24,8 @@ export default class PlayerObj {
     this._hasTurn = true;
   }
 
-  passTurnTo(playerId: number) {
+  endTurn() {
     this._hasTurn = false;
-    // TODO: use websocket to pass the turn onwards
   }
 
   get letters(): LetterObj[] {

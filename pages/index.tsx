@@ -57,7 +57,7 @@ const App: NextPage = () => {
     // infinite rerender loop if we don't call this initially in useEffect()
     const initialRack = takeLettersFromPouch(7);
     setRackLetters(initialRack);
-  }, [])
+  }, []);
 
   return (
     <div onMouseMove={handleMouseMove} className="relative">
@@ -70,7 +70,7 @@ const App: NextPage = () => {
           return <Tile key={tileObj.id} tileObj={tileObj} handleClick={handleTileClick} />;
         });
       })}</Board>
-      <Rack color={'#2e9bd5'} handleClick={handleRackClick}>{rack && rack.map(letterObj => {
+      <Rack handleClick={handleRackClick}>{rack && rack.map(letterObj => {
         return <Letter key={letterObj.id} letterObj={letterObj} handleClick={handleRackedLetterClick} />
       })}
       </Rack>
@@ -78,7 +78,7 @@ const App: NextPage = () => {
         {pickedUpLetter && <Letter letterObj={pickedUpLetter} />}
       </Cursor>
     </div>
-  )
-}
+  );
+};
 
 export default App;

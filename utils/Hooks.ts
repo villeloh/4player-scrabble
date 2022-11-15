@@ -3,7 +3,7 @@ import { useState, MouseEvent } from 'react';
 import TileObj from 'model/TileObj';
 import LetterObj from 'model/LetterObj';
 
-// Technically, the initX() calls should be arguments that are given at the hook callsite,
+// Technically, the initX() calls should be given as arguments at the hook callsite,
 // but their static nature means they can be called here just as well
 
 export function useMouseMove() {
@@ -117,7 +117,7 @@ export function useRack(
 
   const setRackLetters = (letters: LetterObj[]) => {
 
-    // set isClickable to true on the immutable LetterObj
+    // set isClickable to true on the immutable LetterObjs
     setRack([...letters.map(letter => {
       return new LetterObj(letter.id, letter.char, letter.value, true, false);
     })]);

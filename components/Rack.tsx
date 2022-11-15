@@ -1,13 +1,11 @@
 import Letter from "./Letter";
-import { MouseEvent } from "react";
 
 type RackProps = {
-  color: string;
   children?: ReturnType<typeof Letter>[];
-  handleClick: Function
+  handleClick: Function;
 };
 
-export default function Rack({ color, children, handleClick }: RackProps) {
+export default function Rack({ children, handleClick }: RackProps) {
 
   return (
     <div className="flex flex-row items-center justify-center mt-2">

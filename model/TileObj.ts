@@ -12,17 +12,23 @@ export enum BONUS {
 
 export default class TileObj {
 
-  id: number;
-  x: number;
-  y: number;
-  bonus: BONUS;
-  letter?: LetterObj;
+  readonly id: number;
+  readonly x: number;
+  readonly y: number;
+  readonly bonus: BONUS;
+  readonly letter?: LetterObj;
 
-  constructor(id: number, x: number, y: number, bonus?: BONUS, letter?: LetterObj) {
+  constructor(
+    id: number,
+    x: number,
+    y: number,
+    bonus: BONUS = BONUS.NONE,
+    letter?: LetterObj) {
+
     this.id = id;
     this.x = x;
     this.y = y;
-    this.bonus = bonus ?? BONUS.NONE;
+    this.bonus = bonus;
     this.letter = letter;
   }
 };
