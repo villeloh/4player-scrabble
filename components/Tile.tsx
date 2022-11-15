@@ -12,7 +12,7 @@ export default function Tile({ tileObj, handleClick, handleLetterClick }: TilePr
   return (
     <div className='flex items-center justify-center' onClick={() => handleClick(tileObj)}>
       {tileObj.letter
-        ? <Letter letterObj={tileObj.letter} handleClick={() => handleLetterClick()} />
+        ? <Letter letterObj={tileObj.letter} handleClick={() => handleLetterClick(tileObj.letter)} />
         : <img src={tileObj.bonus} width={'46px'} height={'50px'}></img>}
     </div>
   );

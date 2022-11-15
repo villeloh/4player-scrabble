@@ -3,6 +3,9 @@ import { useState, MouseEvent } from 'react';
 import TileObj from 'model/TileObj';
 import LetterObj from 'model/LetterObj';
 
+// Technically, the initX() calls should be arguments that are given at the hook callsite,
+// but their static nature means they can be called here just as well
+
 export function useMouseMove() {
 
   const [position, setPosition] = useState({ x: 0, y: 0 });
@@ -16,34 +19,6 @@ export function useMouseMove() {
     mouseX: position.x,
     mouseY: position.y,
     handleMouseMove
-  };
-};
-
-export function useLetterPouch() {
-
-  const [letterPouch, setLetterPouch] = useState(initLetters());
-
-  const takeRandomLetters = (amount: number) => {
-
-    const indices = new Set<number>();
-
-    // ensure no duplicate indices
-    while (indices.size < amount) {
-
-      indices.add(Math.floor(Math.random() * letterPouch.length));
-    }
-
-    const letters = Array.from(indices).map(index => { return letterPouch[index] });
-
-    // remove the chosen letters from the pouch
-    setLetterPouch([...letterPouch.filter((_, index) => { return !indices.has(index) })]);
-
-    return letters;
-  };
-
-  return {
-    letterPouch,
-    takeRandomLetters
   };
 };
 
@@ -76,8 +51,8 @@ export function useTiles() {
     const newState = tiles.map((row) => {
 
       return row.map((tileObj) => {
-        if (tileObj.id === clickedTile.id) {
-          letter = clickedTile.letter;
+        if (tileObj.id === clickedTile.id && tileObj.letter) {
+          letter = clickedTile.letter!;
           return new TileObj(tileObj.id, tileObj.x, tileObj.y, tileObj.bonus);
         } else {
           return tileObj;
@@ -89,4 +64,79 @@ export function useTiles() {
   };
 
   return { tiles, dropLetter, pickUpLetter };
+};
+
+export function useLetterPouch() {
+
+  const [letterPouch, setLetterPouch] = useState(initLetters());
+
+  const takeRandomLetters = (amount: number) => {
+
+    if (amount > letterPouch.length) {
+      amount = letterPouch.length;
+    }
+
+    const indices = new Set<number>();
+
+    // ensure no duplicate indices
+    while (indices.size < amount) {
+
+      indices.add(Math.floor(Math.random() * letterPouch.length));
+    }
+
+    const letters = Array.from(indices).map(index => { return letterPouch[index] });
+
+    // remove the chosen letters from the pouch
+    setLetterPouch([...letterPouch.filter((_, index) => { return !indices.has(index) })]);
+
+    return letters;
+  };
+
+  return {
+    letterPouch,
+    takeRandomLetters
+  };
+};
+
+export function useRack(letterPouch: LetterObj[], takeRandomLetters: (amount: number) => LetterObj[]) {
+
+  const capacity = 7;
+
+  // infinite rerender loop if we fill the array here with takeRandomLetters(), so it's empty to begin with
+  const [rack, setRack] = useState<LetterObj[]>([]);
+
+  const setRackLetters = (letters: LetterObj[]) => {
+
+    // set isClickable and isRacked to true
+    setRack([...letters.map(letter => {
+      return new LetterObj(letter.id, letter.char, letter.value, true, true, false)
+    })]);
+  };
+
+  const refillRack = () => {
+    const amountToDraw = capacity - rack.length;
+    setRackLetters([...rack, ...takeRandomLetters(amountToDraw)]);
+  };
+
+  const exchangeLetters = (selectedLetters: [LetterObj]) => {
+
+    // Game Rule: can only exchange letters if the pouch has > 7 left
+    if (letterPouch.length <= capacity) return;
+
+    // leave only the LetterObjs that were not in selectedLetters
+    setRackLetters([...rack.filter(letterObj => {
+      return selectedLetters.find(selectedLetterObj => {
+        return letterObj.id !== selectedLetterObj.id
+      })
+    })]);
+    const newLetters = takeRandomLetters(selectedLetters.length);
+    setRackLetters([...rack, ...newLetters]);
+  };
+
+  return {
+    rack,
+    setRackLetters,
+    refillRack,
+    exchangeLetters
+  };
 };

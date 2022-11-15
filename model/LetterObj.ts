@@ -4,17 +4,23 @@ export default class LetterObj {
   id: number;
   char: string;
   value: number;
-  draggable: boolean;
+  isClickable: boolean;
+  isRacked: boolean;
+  isSelected: boolean;
 
   constructor(
     id: number,
     char: string,
     value: number,
-    draggable?: boolean
+    isClickable?: boolean,
+    isRacked?: boolean,
+    isSelected?: boolean
   ) {
     this.id = id;
     this.char = char;
     this.value = value;
-    this.draggable = draggable ?? true;
+    this.isClickable = isClickable || false;
+    this.isRacked = isRacked || false;
+    this.isSelected = isSelected || false;
   }
 };

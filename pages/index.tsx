@@ -1,11 +1,11 @@
 import { NextPage } from 'next';
 import Head from 'next/head';
-import { useState, MouseEvent, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import Board from 'components/Board';
 import Rack from 'components/Rack';
 import Letter from 'components/Letter';
 import Tile from 'components/Tile';
-import { useMouseMove, useLetterPouch, useTiles } from 'utils/Hooks';
+import { useMouseMove, useLetterPouch, useTiles, useRack } from 'utils/hooks';
 import Cursor from 'components/Cursor';
 import LetterObj from 'model/LetterObj';
 import TileObj from 'model/TileObj';
@@ -26,39 +26,43 @@ const Game: NextPage = () => {
     }
   };
 
-  const handleLetterClick = (e: MouseEvent<HTMLDivElement>, letterObj: LetterObj) => {
+  const handleLetterClick = (letterObj: LetterObj) => {
 
-    if (pickedUpLetter || !letterObj?.draggable) return;
+    if (pickedUpLetter || !letterObj.isClickable) return;
 
-    // TODO: the letter state objects could be Maps rather than arrays
-    setPickedUpLetter(rackLetters?.find((letter) => { return letter.id === letterObj.id; }));
-    setRackLetters(rackLetters?.filter((letter) => { return letter.id !== letterObj.id }));
+    setPickedUpLetter(letterObj);
+
+    if (letterObj?.isRacked) {
+      letterObj.isRacked = false;
+      setRackLetters(rack?.filter(letter => { return letter.id !== letterObj.id }));
+    }
   };
 
-  const handleRackClick = (e: MouseEvent<HTMLDivElement>) => {
+  const handleRackClick = () => {
 
     if (pickedUpLetter) {
-      setRackLetters([...rackLetters, pickedUpLetter]);
+      pickedUpLetter.isRacked = true;
+      setRackLetters([...rack, pickedUpLetter]);
       setPickedUpLetter(undefined);
     }
   };
 
-
   const { tiles, dropLetter, pickUpLetter } = useTiles();
   const { letterPouch, takeRandomLetters } = useLetterPouch();
-  const [rackLetters, setRackLetters] = useState<LetterObj[]>([]);
+  const { rack, setRackLetters, refillRack, exchangeLetters } = useRack(letterPouch, takeRandomLetters);
+
   const [pickedUpLetter, setPickedUpLetter] = useState<LetterObj>();
   const [boardLetters, setBoardLetters] = useState<LetterObj[]>([]);
   const [justPlacedLetters, setJustPlacedLetters] = useState<LetterObj[]>([]);
 
+  const { mouseX, mouseY, handleMouseMove } = useMouseMove();
+
   // browser refresh resets the letters; fix it
   useEffect(() => {
-
-    const initialRackLetters = takeRandomLetters(7);
-    setRackLetters(initialRackLetters);
+    // infinite rerender loop if we don't call takeRandomLetters() initially in useEffect()
+    const initialRack = takeRandomLetters(7);
+    setRackLetters(initialRack);
   }, [])
-
-  const { mouseX, mouseY, handleMouseMove } = useMouseMove();
 
   return (
     <div onMouseMove={handleMouseMove} className="relative">
@@ -68,10 +72,10 @@ const Game: NextPage = () => {
       </Head>
       <Board>{tiles.map(row => {
         return row.map(tileObj => {
-          return <Tile tileObj={tileObj} handleClick={handleTileClick} handleLetterClick={handleLetterClick} />;
+          return <Tile key={tileObj.id} tileObj={tileObj} handleClick={handleTileClick} handleLetterClick={handleLetterClick} />;
         });
       })}</Board>
-      <Rack color={'#2e9bd5'} handleClick={handleRackClick}>{rackLetters && rackLetters.map(letterObj => {
+      <Rack color={'#2e9bd5'} handleClick={handleRackClick}>{rack && rack.map(letterObj => {
         return <Letter key={letterObj.id} letterObj={letterObj} handleClick={handleLetterClick} />
       })}
       </Rack>
