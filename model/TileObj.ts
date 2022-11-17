@@ -1,33 +1,27 @@
 import LetterObj from "./LetterObj";
 
-// it's convenient to let the enum store the img url
+// we need to differentiate the values, because they're just naked numbers
 export enum BONUS {
-  NONE = '/blank.jpg',
-  WSx2 = '/WSx2.jpg', // word score x 2
-  WSx3 = '/WSx3.jpg',
-  LSx2 = '/LSx2.jpg', // letter score x 2
-  LSx3 = '/LSx3.jpg',
-  CENTER = '/center_star.jpg' // center WSx2 has a star graphic
+  NONE = 1,
+  WSx2 = 20, // word score x 2
+  WSx3 = 30,
+  LSx2 = 2, // letter score x 2
+  LSx3 = 3,
+  CENTER = 20
 }
 
 export default class TileObj {
 
   readonly id: number;
-  readonly x: number;
-  readonly y: number;
   readonly bonus: BONUS;
   readonly letter?: LetterObj;
 
   constructor(
     id: number,
-    x: number,
-    y: number,
     bonus: BONUS = BONUS.NONE,
     letter?: LetterObj) {
 
     this.id = id;
-    this.x = x;
-    this.y = y;
     this.bonus = bonus;
     this.letter = letter;
   }

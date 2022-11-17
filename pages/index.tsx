@@ -5,7 +5,7 @@ import Board from 'components/Board';
 import Rack from 'components/Rack';
 import Letter from 'components/Letter';
 import Tile from 'components/Tile';
-import { useMouseMove, useLetterPouch, useTiles, useRack } from 'utils/hooks';
+import { useMouseMove, useLetterPouch, useBoard, useRack } from 'utils/hooks';
 import Cursor from 'components/Cursor';
 import LetterObj from 'model/LetterObj';
 import TileObj from 'model/TileObj';
@@ -42,12 +42,11 @@ const App: NextPage = () => {
     }
   };
 
-  const { tiles, dropLetterOn, pickUpLetterFrom } = useTiles();
+  const { tiles, dropLetterOn, pickUpLetterFrom, getUnverifiedWordsAndPoints } = useBoard();
   const { letterPouch, takeLettersFromPouch, putLettersInPouch } = useLetterPouch();
   const { rack, setRackLetters, removeRackLetter, refillRack, exchangeRackLetters } = useRack(letterPouch, takeLettersFromPouch, putLettersInPouch);
 
   const [pickedUpLetter, setPickedUpLetter] = useState<LetterObj>();
-  const [boardLetters, setBoardLetters] = useState<LetterObj[]>([]);
   const [justPlacedLetters, setJustPlacedLetters] = useState<LetterObj[]>([]);
 
   const { mouseX, mouseY, handleMouseMove } = useMouseMove();
@@ -65,11 +64,10 @@ const App: NextPage = () => {
         <title>{pageTitle}</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <Board>{tiles.map(row => {
-        return row.map(tileObj => {
-          return <Tile key={tileObj.id} tileObj={tileObj} handleClick={handleTileClick} />;
-        });
-      })}</Board>
+      <Board>{
+        [...tiles].map(idAndTileObjArray => {
+          return <Tile key={idAndTileObjArray[0]} tileObj={idAndTileObjArray[1]} handleClick={handleTileClick} />;
+        })}</Board>
       <Rack handleClick={handleRackClick}>{rack && rack.map(letterObj => {
         return <Letter key={letterObj.id} letterObj={letterObj} handleClick={handleRackedLetterClick} />
       })}

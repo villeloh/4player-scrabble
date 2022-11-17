@@ -1,7 +1,7 @@
 import Tile from 'components/Tile';
 
 type BoardProps = {
-  children: ReturnType<typeof Tile>[][];
+  children: ReturnType<typeof Tile>[];
 };
 
 export default function Board({ children }: BoardProps) {

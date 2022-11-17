@@ -1,7 +1,8 @@
 import { initLetters, initTiles } from './init';
 import { useState, MouseEvent } from 'react';
-import TileObj from 'model/TileObj';
+import TileObj, { BONUS } from 'model/TileObj';
 import LetterObj from 'model/LetterObj';
+import Word from 'model/Word';
 
 // Technically, the initX() calls should be given as arguments at the hook callsite,
 // but their static nature means they can be called here just as well
@@ -22,47 +23,183 @@ export function useMouseMove() {
   };
 };
 
-export function useTiles() {
+export function useBoard() {
+
+  // Due to using a Map<id, TileObj> to store the tiles, a jump in id number by this amount will bring us 
+  // directly under the current tile on the board (a negative jump will bring us to the tile 
+  // that's on top of the current tile)
+  const VERTICAL_JUMP = 15;
 
   const [tiles, setTiles] = useState(initTiles());
 
+  // store the locations of the 'locked' letters that have been scored in the past.
+  const [lockedLetterTileIds, setLockedLetterTileIds] = useState(new Set<number>());
+
+  // letters that have been dropped on the board, but not locked on it yet
+  const [newLetterTileIds, setNewLetterTileIds] = useState(new Set<number>());
+
   const dropLetterOn = (clickedTile: TileObj, letterObj: LetterObj) => {
 
-    // highly inefficient... It would be better to use coordinate (x,y) to alter 
-    // the state and spread the array of arrays in the set method, but the correct syntax escapes me atm
-    const newTiles = tiles.map(row => {
+    const newTileWithLetter = new TileObj(clickedTile.id, clickedTile.bonus, letterObj);
 
-      return row.map(tileObj => {
-        if (clickedTile.id === tileObj.id) {
-          return new TileObj(tileObj.id, tileObj.x, tileObj.y, tileObj.bonus, letterObj);
-        } else {
-          return tileObj;
-        }
-      });
-    });
-    setTiles(newTiles);
+    // replace the old, empty tile with it
+    setTiles(new Map<number, TileObj>([...tiles, [clickedTile.id, newTileWithLetter]]));
+    setNewLetterTileIds(new Set([...newLetterTileIds, clickedTile.id]));
   };
 
   const pickUpLetterFrom = (clickedTile: TileObj) => {
 
     if (!clickedTile.letter) return;
 
-    // again, array spread syntax error prevents efficiency
-    const newTiles = tiles.map(row => {
+    const newTileWithoutLetter = new TileObj(clickedTile.id, clickedTile.bonus);
 
-      return row.map(tileObj => {
-        if (tileObj.id === clickedTile.id && tileObj.letter) {
-          return new TileObj(tileObj.id, tileObj.x, tileObj.y, tileObj.bonus);
-        } else {
-          return tileObj;
-        }
-      });
-    });
-    setTiles(newTiles);
+    // replace the old, occupied tile with it
+    setTiles(new Map<number, TileObj>([...tiles, [clickedTile.id, newTileWithoutLetter]]));
+
+    const newBoardLetterTileIds = new Set(newLetterTileIds);
+    newBoardLetterTileIds.delete(clickedTile.id);
+    setNewLetterTileIds(newBoardLetterTileIds);
+
     return clickedTile.letter;
   };
 
-  return { tiles, dropLetterOn, pickUpLetterFrom };
+  const lockBoardLetters = () => {
+
+    setLockedLetterTileIds(new Set<number>(newLetterTileIds));
+    setNewLetterTileIds(new Set<number>());
+  };
+
+  const leftmostLetteredTilesId = (searchId: number) => {
+
+    let leftmostId = searchId;
+
+    let isLetterToTheLeft = tiles.get(--searchId)?.letter !== undefined;
+
+    while (isLetterToTheLeft) {
+
+      leftmostId = tiles.get(searchId)!.id;
+      isLetterToTheLeft = tiles.get(--searchId)?.letter !== undefined;
+    }
+    return leftmostId;
+  };
+
+  const topmostLetteredTilesId = (searchId: number) => {
+
+    let topmostId = searchId;
+
+    let isLetterUp = tiles.get(searchId - VERTICAL_JUMP)?.letter !== undefined;
+
+    while (isLetterUp) {
+
+      topmostId = tiles.get(searchId)!.id;
+      isLetterUp = tiles.get(searchId -= VERTICAL_JUMP)?.letter !== undefined;
+    }
+    return topmostId;
+  };
+
+  const getHorizontalWord = (startTileId: number) => {
+
+    let wordPoints = 0;
+    let wordBonusMultiplier = 1;
+
+    let charPoints = 0;
+
+    let searchId = leftmostLetteredTilesId(startTileId);
+
+    let tile = tiles.get(searchId);
+    let word = '';
+    let char: string | undefined = tile!.letter!.char;
+
+    while (char) {
+
+      // base value without any bonuses
+      charPoints += tile!.letter!.value;
+
+      const isNewChar = !lockedLetterTileIds.has(searchId);
+
+      // old chars' bonuses are not applied
+      if (isNewChar) {
+        // includes BONUS.CENTER too (since its value is 20 as well)
+        if (tile!.bonus === BONUS.WSx2 || tile!.bonus === BONUS.WSx3) {
+
+          // see TileObj for the division logic
+          wordBonusMultiplier *= tile!.bonus / 10;
+        } else { //  Bonus.NONE or has a letter ('char') score bonus
+          charPoints *= tile!.bonus; // x 1, 2, or 3
+        }
+      }
+      word += char;
+      wordPoints += charPoints;
+
+      char = tiles.get(++searchId)?.letter?.char;
+      charPoints = 0; // prepare for next char
+    }
+    wordPoints *= wordBonusMultiplier;
+
+    return new Word(word, wordPoints);
+  };
+
+  const getVerticalWord = (startTileId: number) => {
+
+    let wordPoints = 0;
+    let wordBonusMultiplier = 1;
+
+    let charPoints = 0;
+
+    let searchId = topmostLetteredTilesId(startTileId);
+
+    let tile = tiles.get(searchId);
+    let word = '';
+    let char: string | undefined = tile!.letter!.char;
+
+    while (char) {
+
+      // base value without any bonuses
+      charPoints += tile!.letter!.value;
+
+      const isNewChar = !lockedLetterTileIds.has(searchId);
+
+      // old chars' bonuses are not applied
+      if (isNewChar) {
+        // includes BONUS.CENTER too (since its value is 20 as well)
+        if (tile!.bonus === BONUS.WSx2 || tile!.bonus === BONUS.WSx3) {
+
+          // see TileObj for the division logic
+          wordBonusMultiplier *= tile!.bonus / 10;
+        } else { // Bonus.NONE or has a letter ('char') score bonus
+          charPoints *= tile!.bonus; // x 1, 2, or 3
+        }
+      }
+      word += char;
+      wordPoints += charPoints;
+
+      char = tiles.get(searchId += VERTICAL_JUMP)?.letter?.char;
+      charPoints = 0; // prepare for next char
+    }
+    wordPoints *= wordBonusMultiplier;
+
+    return new Word(word, wordPoints);
+  };
+
+  const getUnverifiedWordsAndPoints = (idsOfNewLetteredTiles: number[]) => {
+
+    const words = new Set<Word>();
+
+    // Game Rule: emptying the whole rack earns 50 bonus points
+    let points = idsOfNewLetteredTiles.length === 7 ? 50 : 0;
+
+    idsOfNewLetteredTiles.forEach(id => {
+
+      // a lot of duplicate operations, but who cares, the array is very small
+      words.add(getHorizontalWord(id));
+      words.add(getVerticalWord(id));
+    });
+
+    // points will only be applied if the words are valid (fulfill Dictionary API call & length > 1 char)
+    return words;
+  };
+
+  return { tiles, dropLetterOn, pickUpLetterFrom, lockBoardLetters, getUnverifiedWordsAndPoints };
 };
 
 export function useLetterPouch() {

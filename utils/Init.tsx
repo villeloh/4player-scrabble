@@ -1,282 +1,253 @@
 import LetterObj from 'model/LetterObj';
 import TileObj, { BONUS } from 'model/TileObj';
 
-export function initTiles(): TileObj[][] {
+export function initTiles(): Map<number, TileObj> {
 
   let id = 1;
-  let y = 0;
 
-  return [
-    [
-      new TileObj(id++, 0, y, BONUS.WSx3),
-      new TileObj(id++, 1, y),
-      new TileObj(id++, 2, y),
-      new TileObj(id++, 3, y, BONUS.LSx2),
-      new TileObj(id++, 4, y),
-      new TileObj(id++, 5, y),
-      new TileObj(id++, 6, y),
-      new TileObj(id++, 7, y, BONUS.WSx3),
-      new TileObj(id++, 8, y),
-      new TileObj(id++, 9, y),
-      new TileObj(id++, 10, y),
-      new TileObj(id++, 11, y, BONUS.LSx2),
-      new TileObj(id++, 12, y),
-      new TileObj(id++, 13, y),
-      new TileObj(id++, 14, y, BONUS.WSx3)
-    ],
+  const tiles = new Map<number, TileObj>();
 
-    [
-      new TileObj(id++, 0, ++y),
-      new TileObj(id++, 1, y, BONUS.WSx2),
-      new TileObj(id++, 2, y),
-      new TileObj(id++, 3, y),
-      new TileObj(id++, 4, y),
-      new TileObj(id++, 5, y, BONUS.LSx3),
-      new TileObj(id++, 6, y),
-      new TileObj(id++, 7, y),
-      new TileObj(id++, 8, y),
-      new TileObj(id++, 9, y, BONUS.LSx3),
-      new TileObj(id++, 10, y),
-      new TileObj(id++, 11, y),
-      new TileObj(id++, 12, y),
-      new TileObj(id++, 13, y, BONUS.WSx2),
-      new TileObj(id++, 14, y)
-    ],
+  tiles.set(id, new TileObj(id, BONUS.WSx3));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id, BONUS.LSx2));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id, BONUS.WSx3));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id, BONUS.LSx2));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id, BONUS.WSx3));
 
-    [
-      new TileObj(id++, 0, ++y),
-      new TileObj(id++, 1, y),
-      new TileObj(id++, 2, y, BONUS.WSx2),
-      new TileObj(id++, 3, y),
-      new TileObj(id++, 4, y),
-      new TileObj(id++, 5, y),
-      new TileObj(id++, 6, y, BONUS.LSx2),
-      new TileObj(id++, 7, y),
-      new TileObj(id++, 8, y, BONUS.LSx2),
-      new TileObj(id++, 9, y),
-      new TileObj(id++, 10, y),
-      new TileObj(id++, 11, y),
-      new TileObj(id++, 12, y, BONUS.WSx2),
-      new TileObj(id++, 13, y),
-      new TileObj(id++, 14, y)
-    ],
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id, BONUS.WSx2));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id, BONUS.LSx3));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id, BONUS.LSx3));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id, BONUS.WSx2));
+  tiles.set(++id, new TileObj(id));
 
-    [
-      new TileObj(id++, 0, ++y, BONUS.LSx2),
-      new TileObj(id++, 1, y),
-      new TileObj(id++, 2, y),
-      new TileObj(id++, 3, y, BONUS.WSx2),
-      new TileObj(id++, 4, y),
-      new TileObj(id++, 5, y),
-      new TileObj(id++, 6, y),
-      new TileObj(id++, 7, y, BONUS.LSx2),
-      new TileObj(id++, 8, y),
-      new TileObj(id++, 9, y),
-      new TileObj(id++, 10, y),
-      new TileObj(id++, 11, y, BONUS.WSx2),
-      new TileObj(id++, 12, y),
-      new TileObj(id++, 13, y),
-      new TileObj(id++, 14, y, BONUS.LSx2)
-    ],
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id, BONUS.WSx2));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id, BONUS.LSx2));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id, BONUS.LSx2));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id, BONUS.WSx2));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id));
 
-    [
-      new TileObj(id++, 0, ++y),
-      new TileObj(id++, 1, y),
-      new TileObj(id++, 2, y),
-      new TileObj(id++, 3, y),
-      new TileObj(id++, 4, y, BONUS.WSx2),
-      new TileObj(id++, 5, y),
-      new TileObj(id++, 6, y),
-      new TileObj(id++, 7, y),
-      new TileObj(id++, 8, y),
-      new TileObj(id++, 9, y),
-      new TileObj(id++, 10, y, BONUS.WSx2),
-      new TileObj(id++, 11, y),
-      new TileObj(id++, 12, y),
-      new TileObj(id++, 13, y),
-      new TileObj(id++, 14, y)
-    ],
+  tiles.set(++id, new TileObj(id, BONUS.LSx2));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id, BONUS.WSx2));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id, BONUS.LSx2));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id, BONUS.WSx2));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id, BONUS.LSx2));
 
-    [
-      new TileObj(id++, 0, ++y),
-      new TileObj(id++, 1, y, BONUS.LSx3),
-      new TileObj(id++, 2, y),
-      new TileObj(id++, 3, y),
-      new TileObj(id++, 4, y),
-      new TileObj(id++, 5, y, BONUS.LSx3),
-      new TileObj(id++, 6, y),
-      new TileObj(id++, 7, y),
-      new TileObj(id++, 8, y),
-      new TileObj(id++, 9, y, BONUS.LSx3),
-      new TileObj(id++, 10, y),
-      new TileObj(id++, 11, y),
-      new TileObj(id++, 12, y),
-      new TileObj(id++, 13, y, BONUS.LSx3),
-      new TileObj(id++, 14, y)
-    ],
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id, BONUS.WSx2));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id, BONUS.WSx2));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id));
 
-    [
-      new TileObj(id++, 0, ++y),
-      new TileObj(id++, 1, y),
-      new TileObj(id++, 2, y, BONUS.LSx2),
-      new TileObj(id++, 3, y),
-      new TileObj(id++, 4, y),
-      new TileObj(id++, 5, y),
-      new TileObj(id++, 6, y, BONUS.LSx2),
-      new TileObj(id++, 7, y),
-      new TileObj(id++, 8, y, BONUS.LSx2),
-      new TileObj(id++, 9, y),
-      new TileObj(id++, 10, y),
-      new TileObj(id++, 11, y),
-      new TileObj(id++, 12, y, BONUS.LSx2),
-      new TileObj(id++, 13, y),
-      new TileObj(id++, 14, y)
-    ],
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id, BONUS.LSx3));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id, BONUS.LSx3));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id, BONUS.LSx3));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id, BONUS.LSx3));
+  tiles.set(++id, new TileObj(id));
 
-    [
-      new TileObj(id++, 0, ++y, BONUS.WSx3),
-      new TileObj(id++, 1, y),
-      new TileObj(id++, 2, y),
-      new TileObj(id++, 3, y, BONUS.LSx2),
-      new TileObj(id++, 4, y),
-      new TileObj(id++, 5, y),
-      new TileObj(id++, 6, y),
-      new TileObj(id++, 7, y, BONUS.CENTER),
-      new TileObj(id++, 8, y),
-      new TileObj(id++, 9, y),
-      new TileObj(id++, 10, y),
-      new TileObj(id++, 11, y, BONUS.LSx2),
-      new TileObj(id++, 12, y),
-      new TileObj(id++, 13, y),
-      new TileObj(id++, 14, y, BONUS.WSx3)
-    ],
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id, BONUS.LSx2));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id, BONUS.LSx2));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id, BONUS.LSx2));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id, BONUS.LSx2));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id));
 
-    [
-      new TileObj(id++, 0, ++y),
-      new TileObj(id++, 1, y),
-      new TileObj(id++, 2, y, BONUS.LSx2),
-      new TileObj(id++, 3, y),
-      new TileObj(id++, 4, y),
-      new TileObj(id++, 5, y),
-      new TileObj(id++, 6, y, BONUS.LSx2),
-      new TileObj(id++, 7, y),
-      new TileObj(id++, 8, y, BONUS.LSx2),
-      new TileObj(id++, 9, y),
-      new TileObj(id++, 10, y),
-      new TileObj(id++, 11, y),
-      new TileObj(id++, 12, y, BONUS.LSx2),
-      new TileObj(id++, 13, y),
-      new TileObj(id++, 14, y)
-    ],
+  tiles.set(++id, new TileObj(id, BONUS.WSx3));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id, BONUS.LSx2));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id, BONUS.CENTER));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id, BONUS.LSx2));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id, BONUS.WSx3));
 
-    [
-      new TileObj(id++, 0, ++y),
-      new TileObj(id++, 1, y, BONUS.LSx3),
-      new TileObj(id++, 2, y),
-      new TileObj(id++, 3, y),
-      new TileObj(id++, 4, y),
-      new TileObj(id++, 5, y, BONUS.LSx3),
-      new TileObj(id++, 6, y),
-      new TileObj(id++, 7, y),
-      new TileObj(id++, 8, y),
-      new TileObj(id++, 9, y, BONUS.LSx3),
-      new TileObj(id++, 10, y),
-      new TileObj(id++, 11, y),
-      new TileObj(id++, 12, y),
-      new TileObj(id++, 13, y, BONUS.LSx3),
-      new TileObj(id++, 14, y)
-    ],
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id, BONUS.LSx2));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id, BONUS.LSx2));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id, BONUS.LSx2));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id, BONUS.LSx2));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id));
 
-    [
-      new TileObj(id++, 0, ++y),
-      new TileObj(id++, 1, y),
-      new TileObj(id++, 2, y),
-      new TileObj(id++, 3, y),
-      new TileObj(id++, 4, y, BONUS.WSx2),
-      new TileObj(id++, 5, y),
-      new TileObj(id++, 6, y),
-      new TileObj(id++, 7, y),
-      new TileObj(id++, 8, y),
-      new TileObj(id++, 9, y),
-      new TileObj(id++, 10, y, BONUS.WSx2),
-      new TileObj(id++, 11, y),
-      new TileObj(id++, 12, y),
-      new TileObj(id++, 13, y),
-      new TileObj(id++, 14, y)
-    ],
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id, BONUS.LSx3));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id, BONUS.LSx3));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id, BONUS.LSx3));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id, BONUS.LSx3));
+  tiles.set(++id, new TileObj(id));
 
-    [
-      new TileObj(id++, 0, ++y, BONUS.LSx2),
-      new TileObj(id++, 1, y),
-      new TileObj(id++, 2, y),
-      new TileObj(id++, 3, y, BONUS.WSx2),
-      new TileObj(id++, 4, y),
-      new TileObj(id++, 5, y),
-      new TileObj(id++, 6, y),
-      new TileObj(id++, 7, y, BONUS.LSx2),
-      new TileObj(id++, 8, y),
-      new TileObj(id++, 9, y),
-      new TileObj(id++, 10, y),
-      new TileObj(id++, 11, y, BONUS.WSx2),
-      new TileObj(id++, 12, y),
-      new TileObj(id++, 13, y),
-      new TileObj(id++, 14, y, BONUS.LSx2)
-    ],
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id, BONUS.WSx2));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id, BONUS.WSx2));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id));
 
-    [
-      new TileObj(id++, 0, ++y),
-      new TileObj(id++, 1, y),
-      new TileObj(id++, 2, y, BONUS.WSx2),
-      new TileObj(id++, 3, y),
-      new TileObj(id++, 4, y),
-      new TileObj(id++, 5, y),
-      new TileObj(id++, 6, y, BONUS.LSx2),
-      new TileObj(id++, 7, y),
-      new TileObj(id++, 8, y, BONUS.LSx2),
-      new TileObj(id++, 9, y),
-      new TileObj(id++, 10, y),
-      new TileObj(id++, 11, y),
-      new TileObj(id++, 12, y, BONUS.WSx2),
-      new TileObj(id++, 13, y),
-      new TileObj(id++, 14, y)
-    ],
+  tiles.set(++id, new TileObj(id, BONUS.LSx2));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id, BONUS.WSx2));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id, BONUS.LSx2));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id, BONUS.WSx2));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id, BONUS.LSx2));
 
-    [
-      new TileObj(id++, 0, ++y),
-      new TileObj(id++, 1, y, BONUS.WSx2),
-      new TileObj(id++, 2, y),
-      new TileObj(id++, 3, y),
-      new TileObj(id++, 4, y),
-      new TileObj(id++, 5, y, BONUS.LSx3),
-      new TileObj(id++, 6, y),
-      new TileObj(id++, 7, y),
-      new TileObj(id++, 8, y),
-      new TileObj(id++, 9, y, BONUS.LSx3),
-      new TileObj(id++, 10, y),
-      new TileObj(id++, 11, y),
-      new TileObj(id++, 12, y),
-      new TileObj(id++, 13, y, BONUS.WSx2),
-      new TileObj(id++, 14, y)
-    ],
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id, BONUS.WSx2));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id, BONUS.LSx2));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id, BONUS.LSx2));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id, BONUS.WSx2));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id));
 
-    [
-      new TileObj(id++, 0, ++y, BONUS.WSx3),
-      new TileObj(id++, 1, y),
-      new TileObj(id++, 2, y),
-      new TileObj(id++, 3, y, BONUS.LSx2),
-      new TileObj(id++, 4, y),
-      new TileObj(id++, 5, y),
-      new TileObj(id++, 6, y),
-      new TileObj(id++, 7, y, BONUS.WSx3),
-      new TileObj(id++, 8, y),
-      new TileObj(id++, 9, y),
-      new TileObj(id++, 10, y),
-      new TileObj(id++, 11, y, BONUS.LSx2),
-      new TileObj(id++, 12, y),
-      new TileObj(id++, 13, y),
-      new TileObj(id++, 14, y, BONUS.WSx3)
-    ]
-  ];
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id, BONUS.WSx2));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id, BONUS.LSx3));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id, BONUS.LSx3));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id, BONUS.WSx2));
+  tiles.set(++id, new TileObj(id));
+
+  tiles.set(id, new TileObj(id, BONUS.WSx3));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id, BONUS.LSx2));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id, BONUS.WSx3));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id, BONUS.LSx2));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id));
+  tiles.set(++id, new TileObj(id, BONUS.WSx3));
+
+  return tiles;
 };
 
 export function initLetters(): LetterObj[] {
