@@ -122,8 +122,11 @@ export function useBoard() {
         // includes BONUS.CENTER too (since its value is 20 as well)
         if (tile!.bonus === BONUS.WSx2 || tile!.bonus === BONUS.WSx3) {
 
-          // see TileObj for the division logic
+          // see TileObj for the division 'logic'...
           wordBonusMultiplier *= tile!.bonus / 10;
+        } else if (tile!.bonus === BONUS.CENTER) {
+
+          wordBonusMultiplier *= tile!.bonus / 20;
         } else { //  Bonus.NONE or has a letter ('char') score bonus
           charPoints *= tile!.bonus; // x 1, 2, or 3
         }
@@ -133,7 +136,7 @@ export function useBoard() {
 
       char = tiles.get(++searchId)?.letter?.char;
       charPoints = 0; // prepare for next char
-    }
+    } // end while-loop
     wordPoints *= wordBonusMultiplier;
 
     return new Word(word, wordPoints);
@@ -161,11 +164,13 @@ export function useBoard() {
 
       // old chars' bonuses are not applied
       if (isNewChar) {
-        // includes BONUS.CENTER too (since its value is 20 as well)
         if (tile!.bonus === BONUS.WSx2 || tile!.bonus === BONUS.WSx3) {
 
-          // see TileObj for the division logic
+          // see TileObj for the division 'logic'...
           wordBonusMultiplier *= tile!.bonus / 10;
+        } else if (tile!.bonus === BONUS.CENTER) {
+
+          wordBonusMultiplier *= tile!.bonus / 20;
         } else { // Bonus.NONE or has a letter ('char') score bonus
           charPoints *= tile!.bonus; // x 1, 2, or 3
         }
@@ -175,7 +180,7 @@ export function useBoard() {
 
       char = tiles.get(searchId += VERTICAL_JUMP)?.letter?.char;
       charPoints = 0; // prepare for next char
-    }
+    } // end while-loop
     wordPoints *= wordBonusMultiplier;
 
     return new Word(word, wordPoints);
@@ -184,9 +189,6 @@ export function useBoard() {
   const getUnverifiedWordsAndPoints = (idsOfNewLetteredTiles: number[]) => {
 
     const words = new Set<Word>();
-
-    // Game Rule: emptying the whole rack earns 50 bonus points
-    let points = idsOfNewLetteredTiles.length === 7 ? 50 : 0;
 
     idsOfNewLetteredTiles.forEach(id => {
 
@@ -247,49 +249,86 @@ export function useRack(
   takeLettersFromPouch: (amount: number) => LetterObj[],
   putLettersInPouch: (letters: LetterObj[]) => void) {
 
+  // always have 7 letters (including null :p) so that the visual rack works properly
   const capacity = 7;
 
-  // infinite rerender loop if we fill the array here with takeLettersFromPouch(), so it's empty to begin with
-  const [rack, setRack] = useState<LetterObj[]>([]);
+  const [rack, setRack] = useState<Map<number, LetterObj | null>>(
+    new Map([[0, null], [1, null], [2, null], [3, null], [4, null], [5, null], [6, null]])
+  );
 
-  const setRackLetters = (letters: LetterObj[]) => {
+  const addLettersToRack = (letters: LetterObj[]) => {
 
-    // set isClickable to true on the immutable LetterObjs
-    setRack([...letters.map(letter => {
-      return new LetterObj(letter.id, letter.char, letter.value, true, false);
-    })]);
+    const newRack = new Map<number, LetterObj | null>(rack);
+
+    rack.forEach((oldLetter, slotId) => {
+
+      const letterToAdd = letters[slotId]; // we can use the slotId to iterate these too
+
+      if (oldLetter === null && letterToAdd) {
+
+        // set isClickable to true on the immutable LetterObjs
+        const clickableLetter = new LetterObj(letterToAdd.id, letterToAdd.char, letterToAdd.value, true, false);
+
+        newRack.set(slotId, clickableLetter);
+      }
+    });
+    setRack(newRack);
   };
 
-  const removeRackLetter = (letterObj: LetterObj) => {
+  const removeRackLetterFrom = (slotId: number) => {
 
-    setRackLetters(rack.filter(letter => { return letter.id !== letterObj.id }));
+    const rackCopy = new Map<number, LetterObj | null>(rack);
+    rackCopy.set(slotId, null);
+
+    setRack(rackCopy);
+  };
+
+  const addRackLetterAt = (slotId: number, letterObj: LetterObj) => {
+
+    const rackCopy = new Map<number, LetterObj | null>(rack);
+
+    rackCopy.set(slotId, letterObj);
+    setRack(rackCopy);
   };
 
   const refillRack = () => {
-    const amountToDraw = capacity - rack.length;
-    setRackLetters([...rack, ...takeLettersFromPouch(amountToDraw)]);
+
+    let numToDraw = 0;
+    rack.forEach((_, id) => {
+      if (rack.get(id) === null) {
+        numToDraw++;
+      }
+    });
+    addLettersToRack(takeLettersFromPouch(numToDraw));
   };
 
-  const exchangeRackLetters = (selectedLetters: [LetterObj]) => {
+  // convoluted mess; think of improvements
+  const exchangeRackLetters = (lettersToExchange: [LetterObj]) => {
 
     // Game Rule: can only exchange letters if the pouch has > 7 left
     if (letterPouch.length <= capacity) return;
 
-    // leave only the LetterObjs that were not in selectedLetters
-    setRackLetters([...rack.filter(letterObj => {
-      return selectedLetters.find(selectedLetterObj => {
-        return letterObj.id !== selectedLetterObj.id
-      })
-    })]);
-    const newLetters = takeLettersFromPouch(selectedLetters.length);
-    putLettersInPouch(selectedLetters); // return them to the pouch
-    setRackLetters([...rack, ...newLetters]);
+    const rackCopy = new Map<number, LetterObj | null>(rack);
+
+    // remove the selected letters from the rack
+    rack.forEach((letterObj, id) => {
+
+      if (lettersToExchange.find(letter => { return letter.id === letterObj?.id }))
+        rackCopy.set(id, null);
+    });
+    setRack(rackCopy);
+
+    putLettersInPouch(lettersToExchange); // return them to the pouch
+
+    const newLetters = takeLettersFromPouch(lettersToExchange.length);
+    addLettersToRack(newLetters);
   };
 
   return {
     rack,
-    removeRackLetter,
-    setRackLetters,
+    removeRackLetterFrom,
+    addRackLetterAt,
+    addLettersToRack,
     refillRack,
     exchangeRackLetters
   };

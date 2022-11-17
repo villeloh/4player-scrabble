@@ -1,19 +1,41 @@
+import LetterObj from "model/LetterObj";
 import Letter from "./Letter";
 
 type RackProps = {
-  children?: ReturnType<typeof Letter>[];
-  handleClick: Function;
+  children: Map<number, LetterObj | null>;
+  handleSlotClick: Function;
 };
 
-export default function Rack({ children, handleClick }: RackProps) {
+export default function Rack({ children, handleSlotClick }: RackProps) {
+
+  const rackSlots: ReturnType<typeof RackSlot>[] = [];
+
+  children.forEach((letterObj, slotId) => {
+    rackSlots.push(<RackSlot slotId={slotId} letterObj={letterObj} handleClick={handleSlotClick} />);
+  });
 
   return (
     <div className="flex flex-row items-center justify-center mt-2">
       <div className="bg-sky-800 w-fit h-fit items-center justify-center rounded-md">
-        <div className='m-2 flex flex-row bg-[#2e9bd5] w-[350px] h-[60px] p-2 justify-start items-center rounded-md py-2 space-x-2 shadow-inner' onClick={() => handleClick()}>
-          {children}
+        <div className='m-2 flex flex-row bg-[#2e9bd5] w-[350px] h-[60px] p-2 justify-start items-center rounded-md pt-3 pb-2 space-x-2 shadow-inner'>
+          {rackSlots}
         </div >
       </div>
+    </div>
+  );
+};
+
+type RackSlotProps = {
+  slotId: number;
+  letterObj: LetterObj | null;
+  handleClick: Function;
+};
+
+function RackSlot({ slotId, letterObj, handleClick }: RackSlotProps) {
+
+  return (
+    <div className="w-[44px] h-[47px]" onClick={() => handleClick(slotId, letterObj)}>
+      {letterObj && <Letter letterObj={letterObj} />}
     </div>
   );
 };

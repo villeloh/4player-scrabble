@@ -18,33 +18,34 @@ const App: NextPage = () => {
 
     const tileContainsLetter = clickedTile.letter !== undefined;
 
+    // TODO: this could be improved for sure
     if (!tileContainsLetter && pickedUpLetter) {
       dropLetterOn(clickedTile, pickedUpLetter);
       setPickedUpLetter(undefined);
     } else if (tileContainsLetter && !pickedUpLetter) {
       setPickedUpLetter(pickUpLetterFrom(clickedTile));
+    } else if (tileContainsLetter && pickedUpLetter) {
+      const letter = clickedTile.letter;
+      dropLetterOn(clickedTile, pickedUpLetter);
+      setPickedUpLetter(letter);
     }
   };
 
-  const handleRackedLetterClick = (letterObj: LetterObj) => {
-
-    if (pickedUpLetter || !letterObj.isClickable) return;
-
-    setPickedUpLetter(letterObj);
-    removeRackLetter(letterObj);
-  };
-
-  const handleRackClick = () => {
+  const handleRackSlotClick = (slotId: number, letterOrNull: LetterObj | null) => {
 
     if (pickedUpLetter) {
-      setRackLetters([...rack, pickedUpLetter]);
-      setPickedUpLetter(undefined);
+      addRackLetterAt(slotId, pickedUpLetter);
+      setPickedUpLetter(letterOrNull || undefined);
+    } else {
+      const letterToPickUp = rack.get(slotId);
+      setPickedUpLetter(letterToPickUp || undefined);
+      removeRackLetterFrom(slotId);
     }
   };
 
   const { tiles, dropLetterOn, pickUpLetterFrom, getUnverifiedWordsAndPoints } = useBoard();
   const { letterPouch, takeLettersFromPouch, putLettersInPouch } = useLetterPouch();
-  const { rack, setRackLetters, removeRackLetter, refillRack, exchangeRackLetters } = useRack(letterPouch, takeLettersFromPouch, putLettersInPouch);
+  const { rack, removeRackLetterFrom, addRackLetterAt, refillRack, exchangeRackLetters } = useRack(letterPouch, takeLettersFromPouch, putLettersInPouch);
 
   const [pickedUpLetter, setPickedUpLetter] = useState<LetterObj>();
   const [justPlacedLetters, setJustPlacedLetters] = useState<LetterObj[]>([]);
@@ -54,8 +55,7 @@ const App: NextPage = () => {
   // browser refresh resets the letters; fix it
   useEffect(() => {
     // infinite rerender loop if we don't call this initially in useEffect()
-    const initialRack = takeLettersFromPouch(7);
-    setRackLetters(initialRack);
+    refillRack();
   }, []);
 
   return (
@@ -68,9 +68,8 @@ const App: NextPage = () => {
         [...tiles].map(idAndTileObjArray => {
           return <Tile key={idAndTileObjArray[0]} tileObj={idAndTileObjArray[1]} handleClick={handleTileClick} />;
         })}</Board>
-      <Rack handleClick={handleRackClick}>{rack && rack.map(letterObj => {
-        return <Letter key={letterObj.id} letterObj={letterObj} handleClick={handleRackedLetterClick} />
-      })}
+      <Rack handleSlotClick={handleRackSlotClick} >
+        {rack}
       </Rack>
       <Cursor mouseX={mouseX} mouseY={mouseY}>
         {pickedUpLetter && <Letter letterObj={pickedUpLetter} />}

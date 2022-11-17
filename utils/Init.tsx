@@ -231,7 +231,7 @@ export function initTiles(): Map<number, TileObj> {
   tiles.set(++id, new TileObj(id, BONUS.WSx2));
   tiles.set(++id, new TileObj(id));
 
-  tiles.set(id, new TileObj(id, BONUS.WSx3));
+  tiles.set(++id, new TileObj(id, BONUS.WSx3));
   tiles.set(++id, new TileObj(id));
   tiles.set(++id, new TileObj(id));
   tiles.set(++id, new TileObj(id, BONUS.LSx2));

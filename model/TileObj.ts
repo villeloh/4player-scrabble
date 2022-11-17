@@ -7,7 +7,7 @@ export enum BONUS {
   WSx3 = 30,
   LSx2 = 2, // letter score x 2
   LSx3 = 3,
-  CENTER = 20
+  CENTER = 40 // word score x 2; set to 40 because js enums suuuuuck
 }
 
 export default class TileObj {
