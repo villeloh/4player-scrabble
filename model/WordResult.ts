@@ -1,5 +1,5 @@
 
-export default class Word {
+export default class WordResult {
 
   readonly value: string;
   readonly points: number;

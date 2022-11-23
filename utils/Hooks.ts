@@ -2,7 +2,7 @@ import { initLetters, initTiles } from './init';
 import { useState, MouseEvent } from 'react';
 import TileObj, { BONUS } from 'model/TileObj';
 import LetterObj from 'model/LetterObj';
-import Word from 'model/Word';
+import WordResult from 'model/WordResult';
 
 // Technically, the initX() calls should be given as arguments at the hook callsite,
 // but their static nature means they can be called here just as well
@@ -65,7 +65,7 @@ export function useBoard() {
 
   const lockBoardLetters = () => {
 
-    setLockedLetterTileIds(new Set<number>(newLetterTileIds));
+    setLockedLetterTileIds(new Set<number>([...lockedLetterTileIds, ...newLetterTileIds]));
     setNewLetterTileIds(new Set<number>());
   };
 
@@ -119,7 +119,6 @@ export function useBoard() {
 
       // old chars' bonuses are not applied
       if (isNewChar) {
-        // includes BONUS.CENTER too (since its value is 20 as well)
         if (tile!.bonus === BONUS.WSx2 || tile!.bonus === BONUS.WSx3) {
 
           // see TileObj for the division 'logic'...
@@ -139,7 +138,7 @@ export function useBoard() {
     } // end while-loop
     wordPoints *= wordBonusMultiplier;
 
-    return new Word(word, wordPoints);
+    return new WordResult(word, wordPoints);
   };
 
   const getVerticalWord = (startTileId: number) => {
@@ -183,12 +182,12 @@ export function useBoard() {
     } // end while-loop
     wordPoints *= wordBonusMultiplier;
 
-    return new Word(word, wordPoints);
+    return new WordResult(word, wordPoints);
   };
 
   const getUnverifiedWordsAndPoints = (idsOfNewLetteredTiles: number[]) => {
 
-    const words = new Set<Word>();
+    const words = new Set<WordResult>();
 
     idsOfNewLetteredTiles.forEach(id => {
 
@@ -252,6 +251,7 @@ export function useRack(
   // always have 7 letters (including null :p) so that the visual rack works properly
   const capacity = 7;
 
+  // the ids are the indices of the rack 'slots'
   const [rack, setRack] = useState<Map<number, LetterObj | null>>(
     new Map([[0, null], [1, null], [2, null], [3, null], [4, null], [5, null], [6, null]])
   );
