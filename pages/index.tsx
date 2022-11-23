@@ -9,6 +9,8 @@ import { useMouseMove, useLetterPouch, useBoard, useRack } from 'utils/hooks';
 import Cursor from 'components/Cursor';
 import LetterObj from 'model/LetterObj';
 import TileObj from 'model/TileObj';
+import ExchangeButtons from 'components/ExchangeButtons';
+import UIButton from 'components/UIButton';
 
 const App: NextPage = () => {
 
@@ -33,22 +35,52 @@ const App: NextPage = () => {
 
   const handleRackSlotClick = (slotId: number, letterOrNull: LetterObj | null) => {
 
-    if (pickedUpLetter) {
-      addRackLetterAt(slotId, pickedUpLetter);
-      setPickedUpLetter(letterOrNull || undefined);
-    } else {
-      const letterToPickUp = rack.get(slotId);
-      setPickedUpLetter(letterToPickUp || undefined);
-      removeRackLetterFrom(slotId);
+    if (letterExchangeMode && letterOrNull !== null) {
+
+      const alreadySelected = lettersToExchange.includes(letterOrNull);
+      alreadySelected
+        ? setLettersToExchange([...lettersToExchange.filter(letterObj => { return letterObj.id !== letterOrNull.id })])
+        : setLettersToExchange([...lettersToExchange, letterOrNull]);
+    } else if (!letterExchangeMode) {
+      if (pickedUpLetter) {
+        addRackLetterAt(slotId, pickedUpLetter);
+        setPickedUpLetter(letterOrNull || undefined);
+      } else {
+        const letterToPickUp = rack.get(slotId);
+        setPickedUpLetter(letterToPickUp || undefined);
+        removeRackLetterFrom(slotId);
+      }
     }
   };
 
-  const { tiles, dropLetterOn, pickUpLetterFrom, getUnverifiedWordsAndPoints } = useBoard();
-  const { letterPouch, takeLettersFromPouch, putLettersInPouch } = useLetterPouch();
-  const { rack, removeRackLetterFrom, addRackLetterAt, refillRack, exchangeRackLetters } = useRack(letterPouch, takeLettersFromPouch, putLettersInPouch);
+  const handleActivateLetterExchangeModeClick = () => {
+
+    setLetterExchangeMode(true);
+    reRackBoardLetters(addLettersToRack);
+  };
+
+  const handleCancelLetterExchangeModeClick = () => {
+
+    setLettersToExchange([]);
+    setLetterExchangeMode(false);
+  };
+
+  const handleLetterExchangeClick = () => {
+
+    exchangeRackLetters(lettersToExchange);
+    setLettersToExchange([]);
+    setLetterExchangeMode(false);
+    // TODO: pass turn
+  };
+
+  // TODO: getting a little messy here... Not sure of the best solution
+  const { tiles, dropLetterOn, pickUpLetterFrom, reRackBoardLetters, getUnverifiedWordsAndPoints } = useBoard();
+  const { letterPouch, takeLettersFromPouch, exchangeLettersThroughPouch } = useLetterPouch();
+  const { rack, removeRackLetterFrom, addRackLetterAt, refillRack, addLettersToRack, exchangeRackLetters } = useRack(letterPouch, takeLettersFromPouch, exchangeLettersThroughPouch);
 
   const [pickedUpLetter, setPickedUpLetter] = useState<LetterObj>();
-  const [justPlacedLetters, setJustPlacedLetters] = useState<LetterObj[]>([]);
+  const [letterExchangeMode, setLetterExchangeMode] = useState(false);
+  const [lettersToExchange, setLettersToExchange] = useState<LetterObj[]>([]);
 
   const { mouseX, mouseY, handleMouseMove } = useMouseMove();
 
@@ -64,15 +96,17 @@ const App: NextPage = () => {
         <title>{pageTitle}</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
+      <ExchangeButtons letterExchangeMode={letterExchangeMode} handleActivateClick={handleActivateLetterExchangeModeClick} handleCancelClick={handleCancelLetterExchangeModeClick} handleExchangeClick={handleLetterExchangeClick} />
+      <UIButton text='Refill Rack' handleClick={refillRack} />
       <Board>{
         [...tiles].map(idAndTileObjArray => {
           return <Tile key={idAndTileObjArray[0]} tileObj={idAndTileObjArray[1]} handleClick={handleTileClick} />;
         })}</Board>
-      <Rack handleSlotClick={handleRackSlotClick} >
+      <Rack handleSlotClick={handleRackSlotClick} letterExchangeMode={letterExchangeMode} >
         {rack}
       </Rack>
       <Cursor mouseX={mouseX} mouseY={mouseY}>
-        {pickedUpLetter && <Letter letterObj={pickedUpLetter} />}
+        {pickedUpLetter && <Letter letterObj={pickedUpLetter} letterExchangeMode={letterExchangeMode} />}
       </Cursor>
     </div>
   );

@@ -1,5 +1,5 @@
 import { initLetters, initTiles } from './init';
-import { useState, MouseEvent } from 'react';
+import { useState, MouseEvent, useEffect } from 'react';
 import TileObj, { BONUS } from 'model/TileObj';
 import LetterObj from 'model/LetterObj';
 import WordResult from 'model/WordResult';
@@ -51,16 +51,41 @@ export function useBoard() {
 
     if (!clickedTile.letter) return;
 
-    const newTileWithoutLetter = new TileObj(clickedTile.id, clickedTile.bonus);
+    const newTileWithoutLetter = new TileObj(clickedTile.id, clickedTile.bonus, undefined);
 
-    // replace the old, occupied tile with it
-    setTiles(new Map<number, TileObj>([...tiles, [clickedTile.id, newTileWithoutLetter]]));
+    const tilesCopy = new Map(tiles);
+    tilesCopy.set(clickedTile.id, newTileWithoutLetter);
+    setTiles(tilesCopy);
 
     const newBoardLetterTileIds = new Set(newLetterTileIds);
     newBoardLetterTileIds.delete(clickedTile.id);
     setNewLetterTileIds(newBoardLetterTileIds);
 
     return clickedTile.letter;
+  };
+
+  // weird staleness issue with the board visuals unless we batch the re-racking of letters
+  const pickUpLettersFrom = (givenTiles: TileObj[]) => {
+
+    const letters: LetterObj[] = [];
+    const newBoardLetterTileIds = new Set(newLetterTileIds);
+
+    const newTilesWithoutLetters = new Map<number, TileObj>();
+
+    givenTiles.forEach(tile => {
+
+      if (tile.letter) {
+        const newTileWithoutLetters = new TileObj(tile.id, tile.bonus, undefined);
+        newTilesWithoutLetters.set(tile.id, newTileWithoutLetters);
+        newBoardLetterTileIds.delete(tile.id);
+        letters.push(tile.letter);
+      }
+    });
+    const newTiles = new Map([...tiles, ...newTilesWithoutLetters]);
+    setTiles(newTiles);
+    setNewLetterTileIds(newBoardLetterTileIds);
+
+    return letters;
   };
 
   const lockBoardLetters = () => {
@@ -185,11 +210,11 @@ export function useBoard() {
     return new WordResult(word, wordPoints);
   };
 
-  const getUnverifiedWordsAndPoints = (idsOfNewLetteredTiles: number[]) => {
+  const getUnverifiedWordsAndPoints = () => {
 
     const words = new Set<WordResult>();
 
-    idsOfNewLetteredTiles.forEach(id => {
+    newLetterTileIds.forEach(id => {
 
       // a lot of duplicate operations, but who cares, the array is very small
       words.add(getHorizontalWord(id));
@@ -200,7 +225,21 @@ export function useBoard() {
     return words;
   };
 
-  return { tiles, dropLetterOn, pickUpLetterFrom, lockBoardLetters, getUnverifiedWordsAndPoints };
+  // could be part of useRack as well; matter of taste
+  const reRackBoardLetters = (addLettersToRack: Function) => {
+
+    const tilesToReRack: TileObj[] = [];
+
+    newLetterTileIds.forEach(id => {
+
+      tilesToReRack.push(tiles.get(id)!);
+    });
+
+    const letters = pickUpLettersFrom(tilesToReRack);
+    addLettersToRack(letters);
+  };
+
+  return { tiles, dropLetterOn, pickUpLetterFrom, lockBoardLetters, reRackBoardLetters, getUnverifiedWordsAndPoints };
 };
 
 export function useLetterPouch() {
@@ -220,7 +259,6 @@ export function useLetterPouch() {
 
       indices.add(Math.floor(Math.random() * letterPouch.length));
     }
-
     const letters = Array.from(indices).map(index => { return letterPouch[index]; });
 
     // remove the chosen letters from the pouch
@@ -235,18 +273,41 @@ export function useLetterPouch() {
     setLetterPouch([...letterPouch, ...letters]);
   };
 
+  // we need an atomic state update to avoid inconsistent state
+  const exchangeLettersThroughPouch = (oldLetters: LetterObj[]) => {
+
+    const indices = new Set<number>();
+
+    // ensure no duplicate indices
+    while (indices.size < oldLetters.length) {
+
+      indices.add(Math.floor(Math.random() * letterPouch.length));
+    }
+    const newLetters = Array.from(indices).map(index => { return letterPouch[index]; });
+
+    // remove the new drawn letters from the pouch and add the old letters
+    setLetterPouch([...letterPouch.filter((_, index) => { return !indices.has(index); }), ...oldLetters]);
+
+    return newLetters;
+  };
+
+  useEffect(() => {
+    console.log('Letters in Pouch: ', letterPouch.length);
+  }, [letterPouch]);
+
   return {
     letterPouch,
     takeLettersFromPouch,
-    putLettersInPouch
+    exchangeLettersThroughPouch
   };
 };
 
-// passing references to other stateful objects to the hook seems like bad form; think of other solutions
+// passing references to other stateful objects to the hook seems like bad form; think of other solutions.
+// Conversely: maybe the state of exchanged letters should be moved here?
 export function useRack(
   letterPouch: LetterObj[],
   takeLettersFromPouch: (amount: number) => LetterObj[],
-  putLettersInPouch: (letters: LetterObj[]) => void) {
+  exchangeLettersThroughPouch: (letters: LetterObj[]) => LetterObj[]) {
 
   // always have 7 letters (including null :p) so that the visual rack works properly
   const capacity = 7;
@@ -259,17 +320,19 @@ export function useRack(
   const addLettersToRack = (letters: LetterObj[]) => {
 
     const newRack = new Map<number, LetterObj | null>(rack);
+    let index = 0;
 
     rack.forEach((oldLetter, slotId) => {
 
-      const letterToAdd = letters[slotId]; // we can use the slotId to iterate these too
+      if (oldLetter === null || oldLetter === undefined) {
 
-      if (oldLetter === null && letterToAdd) {
+        const letterToAdd = letters[index++];
 
-        // set isClickable to true on the immutable LetterObjs
-        const clickableLetter = new LetterObj(letterToAdd.id, letterToAdd.char, letterToAdd.value, true, false);
-
-        newRack.set(slotId, clickableLetter);
+        if (letterToAdd) {
+          // set isClickable to true on the immutable LetterObjs
+          const clickableLetter = new LetterObj(letterToAdd.id, letterToAdd.char, letterToAdd.value, true);
+          newRack.set(slotId, clickableLetter);
+        }
       }
     });
     setRack(newRack);
@@ -295,7 +358,8 @@ export function useRack(
 
     let numToDraw = 0;
     rack.forEach((_, id) => {
-      if (rack.get(id) === null) {
+      const letter = rack.get(id);
+      if (letter === null || letter === undefined) {
         numToDraw++;
       }
     });
@@ -303,25 +367,23 @@ export function useRack(
   };
 
   // convoluted mess; think of improvements
-  const exchangeRackLetters = (lettersToExchange: [LetterObj]) => {
+  const exchangeRackLetters = (lettersToExchange: LetterObj[]) => {
 
     // Game Rule: can only exchange letters if the pouch has > 7 left
     if (letterPouch.length <= capacity) return;
 
+    const newLetters = exchangeLettersThroughPouch(lettersToExchange);
+
     const rackCopy = new Map<number, LetterObj | null>(rack);
 
-    // remove the selected letters from the rack
+    let index = 0;
     rack.forEach((letterObj, id) => {
 
-      if (lettersToExchange.find(letter => { return letter.id === letterObj?.id }))
-        rackCopy.set(id, null);
+      if (lettersToExchange.find(letter => { return letter.id === letterObj?.id })) {
+        rackCopy.set(id, newLetters[index++]);
+      }
     });
     setRack(rackCopy);
-
-    putLettersInPouch(lettersToExchange); // return them to the pouch
-
-    const newLetters = takeLettersFromPouch(lettersToExchange.length);
-    addLettersToRack(newLetters);
   };
 
   return {

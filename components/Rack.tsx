@@ -1,17 +1,19 @@
 import LetterObj from "model/LetterObj";
+import { useState } from "react";
 import Letter from "./Letter";
 
 type RackProps = {
   children: Map<number, LetterObj | null>;
   handleSlotClick: Function;
+  letterExchangeMode: boolean;
 };
 
-export default function Rack({ children, handleSlotClick }: RackProps) {
+export default function Rack({ children, handleSlotClick, letterExchangeMode }: RackProps) {
 
   const rackSlots: ReturnType<typeof RackSlot>[] = [];
 
   children.forEach((letterObj, slotId) => {
-    rackSlots.push(<RackSlot slotId={slotId} letterObj={letterObj} handleClick={handleSlotClick} />);
+    rackSlots.push(<RackSlot key={slotId} slotId={slotId} letterObj={letterObj} handleClick={handleSlotClick} letterExchangeMode={letterExchangeMode} />);
   });
 
   return (
@@ -29,13 +31,14 @@ type RackSlotProps = {
   slotId: number;
   letterObj: LetterObj | null;
   handleClick: Function;
+  letterExchangeMode: boolean;
 };
 
-function RackSlot({ slotId, letterObj, handleClick }: RackSlotProps) {
+function RackSlot({ slotId, letterObj, handleClick, letterExchangeMode }: RackSlotProps) {
 
   return (
     <div className="w-[44px] h-[47px]" onClick={() => handleClick(slotId, letterObj)}>
-      {letterObj && <Letter letterObj={letterObj} />}
+      {letterObj && <Letter key={letterObj.id} letterObj={letterObj} letterExchangeMode={letterExchangeMode} />}
     </div>
   );
 };
