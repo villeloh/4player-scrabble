@@ -138,12 +138,10 @@ export function useBoard() {
     let charPoints = 0;
 
     let searchId = leftmostLetteredTilesId(startTileId);
-    const yIndex = getYindexFromTileId(searchId);
 
     let tile = tiles.get(searchId);
     let word = '';
     let char: string | undefined = tile?.letter?.char;
-    console.log('first char: ', char);
 
     while (char) {
 
@@ -174,7 +172,7 @@ export function useBoard() {
     } // end while-loop
     wordPoints *= wordBonusMultiplier;
 
-    return { wordResult: new WordResult(word, wordPoints), yIndex };
+    return new WordResult(word, wordPoints);
   };
 
   const getVerticalWord = (startTileId: number) => {
@@ -185,7 +183,6 @@ export function useBoard() {
     let charPoints = 0;
 
     let searchId = topmostLetteredTilesId(startTileId);
-    const xIndex = getXindexFromTileId(searchId);
 
     let tile = tiles.get(searchId);
     let word = '';
@@ -220,31 +217,30 @@ export function useBoard() {
     } // end while-loop
     wordPoints *= wordBonusMultiplier;
 
-    return { wordResult: new WordResult(word, wordPoints), xIndex };
+    return new WordResult(word, wordPoints);
   };
 
+  // a monstrosity of side effects... But it kind of makes sense to do the initial word validation here
   const getUnverifiedWordsAndPoints = () => {
 
-    // TODO: the new board letters need to touch each other and (as a whole) 
-    // at least one locked board letter.
-    // One way to do this: if more than 1 horizontal word, ensure their Y indexes are different;
-    // if more than 1 vertical word, ensure their X indexes are different
+    // TODO: the new board letters need to touch at least one locked board letter.
 
     // TODO: blank tiles' letters need to be chosen before word evaluation,
     // and they need to be returned to the rack (as blank!) upon Error or API verif. failure
 
-    // TODO: lock board letters upon successful word API call; otherwise, return letters
-    // to rack
+    // TODO: lock board letters upon successful word API call; otherwise, return letters to rack
+
+    try {
+      validateNewLetterPlacement();
+    } catch (error) {
+      const err = error as Error;
+      throw err;
+    }
 
     let checkForCenterTile = isFirstPlay;
     let centerTileIncluded = false;
 
-    // used for ensuring contiguous / valid words
-    const horizontalWordYindices: Set<number> = new Set();
-    const verticalWordXIndices: Set<number> = new Set();
-
-    const horizontalWords = new Set<WordResult>();
-    const verticalWords = new Set<WordResult>();
+    const words = new Set<WordResult>();
 
     newLetterTileIds.forEach(id => {
 
@@ -259,46 +255,105 @@ export function useBoard() {
       const horizontal = getHorizontalWord(id);
       const vertical = getVerticalWord(id);
 
-      horizontalWordYindices.add(horizontal.yIndex);
-      verticalWordXIndices.add(vertical.xIndex);
-
-      const horizLengthOk = horizontal.wordResult.word.length > 1;
-      const vertLengthOk = vertical.wordResult.word.length > 1;
+      const horizLengthOk = horizontal.word.length > 1;
+      const vertLengthOk = vertical.word.length > 1;
 
       if (!horizLengthOk && !vertLengthOk) {
         throw new Error('GAME RULE: Dangling letters are not allowed!');
       }
       if (horizLengthOk) {
-        horizontalWords.add(horizontal.wordResult);
+        words.add(horizontal);
       }
       if (vertLengthOk) {
-        verticalWords.add(vertical.wordResult);
+        words.add(vertical);
       }
-    });
+    }); // end forEach
 
     if (isFirstPlay && !centerTileIncluded) {
       throw new Error('GAME RULE: First word must include the center tile (star)!');
     }
+    return WordResult.removeDuplicateValues(words);
+  };
 
-    // JS Sets are fiddly with objects, so we need to remove duplicate WordResults
-    const uniqueHorizWords = WordResult.removeDuplicateValues(horizontalWords);
-    const uniqueVertWords = WordResult.removeDuplicateValues(verticalWords);
+  // validate regarding gaps and angle containment
+  // TODO: combine the monster for-loops somehow
+  const validateNewLetterPlacement = () => {
 
-    // the words must... BLAH; this won't work after all -.-
-    if (uniqueHorizWords.size > 1) {
-      const valid = horizontalWordYindices.size > 1;
-      if (!valid) {
-        throw new Error('GAME RULE: Words must be contiguous!');
+    const xArr: any[] = [];
+    const yArr: any[] = [];
+
+    newLetterTileIds.forEach(tileId => {
+
+      const x = getXindexFromTileId(tileId);
+      const y = getYindexFromTileId(tileId);
+      xArr.push({ x, y });
+      yArr.push({ y, x });
+    });
+
+    xArr.sort((a, b) => a.x - b.x);
+    yArr.sort((a, b) => a.y - b.y);
+
+    let xIdentical = true;
+    let yIdentical = true;
+
+    // -2 on purpose
+    for (let i = 0; i < xArr.length - 2; i++) {
+      const xValue = xArr[i].x;
+      const rightNeighborXvalue = xArr[i + 1].x;
+
+      if (xValue !== rightNeighborXvalue) {
+        xIdentical = false;
       }
-    }
-    if (uniqueVertWords.size > 1) {
-      const valid = verticalWordXIndices.size > 1;
-      if (!valid) {
-        throw new Error('GAME RULE: Words must be contiguous!');
-      }
-    }
 
-    return WordResult.removeDuplicateValues(new Set([...uniqueHorizWords, ...uniqueVertWords]));
+      if (rightNeighborXvalue - xValue > 1) {
+        const inbetweenTileCoords = range(rightNeighborXvalue - xValue + 1, xValue + 1).map(xCoord => {
+          return { x: xCoord, y: +xArr[i].y };
+        });
+        const inbetweenTileIds = inbetweenTileCoords.map(coords => {
+          return getTileIdFromCoords(coords);
+        });
+        inbetweenTileIds.forEach(id => {
+
+          // any gaps between the new letters need to have 'old' board letters in them
+          if (!lockedLetterTileIds.has(id)) {
+            // early return is a bit unclear, but just to make this *slightly* more efficient
+            throw new Error('GAME RULE: No gaps allowed between placed words!');
+          }
+        });
+      }
+    } // end x-sorted for-loop
+
+    // -2 on purpose
+    for (let i = 0; i < yArr.length - 2; i++) {
+      const yValue = yArr[i].y;
+      const downNeighborYvalue = yArr[i + 1].y;
+
+      if (yValue !== downNeighborYvalue) {
+        yIdentical = false;
+      }
+
+      if (downNeighborYvalue - yValue > 1) {
+        const inbetweenTileCoords = range(downNeighborYvalue - yValue + 1, yValue + 1).map(yCoord => {
+          return { y: yCoord, x: +yArr[i].x };
+        });
+        const inbetweenTileIds = inbetweenTileCoords.map(coords => {
+          return getTileIdFromCoords(coords);
+        });
+        inbetweenTileIds.forEach(id => {
+
+          // any gaps between the new letters need to have 'old' board letters in them
+          if (!lockedLetterTileIds.has(id)) {
+            // early return is a bit unclear, but just to make this *slightly* more efficient
+            throw new Error('GAME RULE: No gaps allowed between placed words!');
+          }
+        });
+      }
+    } // end y-sorted for-loop
+
+    // the letters must be in a straight line either vertically or horizontally
+    if (!xIdentical || !yIdentical) {
+      throw new Error('GAME RULE: No angles allowed within placed words!');
+    }
   };
 
   // could be part of useRack as well; matter of taste
@@ -443,7 +498,6 @@ export function useRack(
     addLettersToRack(takeLettersFromPouch(numToDraw));
   };
 
-  // convoluted mess; think of improvements
   const exchangeRackLetters = (lettersToExchange: LetterObj[]) => {
 
     // Game Rule: can only exchange letters if the pouch has > 7 left
@@ -475,12 +529,19 @@ export function useRack(
 
 // a bad consequence of storing the tileIds as a Map is the lack of a 'real' index
 const getXindexFromTileId = (id: number) => {
-
-  const rowNumber = id % 15;
+  const rowNumber = Math.floor(id / 15);
   return id - rowNumber * 15;
 };
 
 const getYindexFromTileId = (id: number) => {
+  return Math.floor(id / 15);
+};
 
-  return id % 15;
+const getTileIdFromCoords = (coords: { x: number, y: number }) => {
+  return coords.x + coords.y * 15;
+};
+
+// range of numbers; e.g. range(3, 2) => [2,3,4]
+const range = (size: number, startAt = 0) => {
+  return [...Array(size).keys()].map(i => i + startAt);
 };
