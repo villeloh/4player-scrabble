@@ -12,7 +12,7 @@ export default function ExchangeButtons({ letterExchangeMode, handleActivateClic
   return (
     <div className="relative flex flex-col">
       {letterExchangeMode
-        ? <div className="flex flex-col w-fit">
+        ? <div className="flex flex-col w-fit gap-2">
           <UIButton text="Exchange Selected" handleClick={handleExchangeClick} />
           <UIButton text="Cancel" handleClick={handleCancelClick} />
         </div>

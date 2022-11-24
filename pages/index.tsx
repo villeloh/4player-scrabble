@@ -11,6 +11,7 @@ import LetterObj from 'model/LetterObj';
 import TileObj from 'model/TileObj';
 import ExchangeButtons from 'components/ExchangeButtons';
 import UIButton from 'components/UIButton';
+import PouchIndicator from 'components/PouchIndicator';
 
 const App: NextPage = () => {
 
@@ -108,15 +109,22 @@ const App: NextPage = () => {
         <title>{pageTitle}</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <ExchangeButtons letterExchangeMode={letterExchangeMode} handleActivateClick={handleActivateLetterExchangeModeClick} handleCancelClick={handleCancelLetterExchangeModeClick} handleExchangeClick={handleLetterExchangeClick} />
-      <UIButton text='Play Word(s)' handleClick={handlePlayWordsClick} />
-      <Board>{
-        [...tiles].map(idAndTileObjArray => {
-          return <Tile key={idAndTileObjArray[0]} tileObj={idAndTileObjArray[1]} handleClick={handleTileClick} />;
-        })}</Board>
-      <Rack handleSlotClick={handleRackSlotClick} letterExchangeMode={letterExchangeMode} >
-        {rack}
-      </Rack>
+      <div className='flex flex-row justify-center'>
+        <div className='mt-16 flex flex-col gap-7'>
+          <PouchIndicator letterPouch={letterPouch} />
+          <ExchangeButtons letterExchangeMode={letterExchangeMode} handleActivateClick={handleActivateLetterExchangeModeClick} handleCancelClick={handleCancelLetterExchangeModeClick} handleExchangeClick={handleLetterExchangeClick} />
+          <UIButton text='Play Word(s)' handleClick={handlePlayWordsClick} />
+        </div>
+        <div>
+          <Board>{
+            [...tiles].map(idAndTileObjArray => {
+              return <Tile key={idAndTileObjArray[0]} tileObj={idAndTileObjArray[1]} handleClick={handleTileClick} />;
+            })}</Board>
+          <Rack handleSlotClick={handleRackSlotClick} letterExchangeMode={letterExchangeMode} >
+            {rack}
+          </Rack>
+        </div>
+      </div>
       <Cursor mouseX={mouseX} mouseY={mouseY}>
         {pickedUpLetter && <Letter letterObj={pickedUpLetter} letterExchangeMode={letterExchangeMode} />}
       </Cursor>

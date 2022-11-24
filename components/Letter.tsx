@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 type LetterProps = {
   letterObj: LetterObj;
   handleClick?: Function;
-  letterExchangeMode: boolean;
+  letterExchangeMode?: boolean;
 };
 
 export default function Letter({ letterObj, handleClick, letterExchangeMode = false }: LetterProps) {
