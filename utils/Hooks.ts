@@ -31,12 +31,20 @@ export function useBoard() {
   const VERTICAL_JUMP = 15;
 
   const [tiles, setTiles] = useState(initTiles());
+  const [isFirstPlay, setIsFirstPlay] = useState(true);
 
   // store the locations of the 'locked' letters that have been scored in the past.
   const [lockedLetterTileIds, setLockedLetterTileIds] = useState(new Set<number>());
 
   // letters that have been dropped on the board, but not locked on it yet
   const [newLetterTileIds, setNewLetterTileIds] = useState(new Set<number>());
+
+  useEffect(() => {
+    if (isFirstPlay && lockedLetterTileIds.size > 0) {
+      setIsFirstPlay(false);
+    }
+  }, [lockedLetterTileIds]);
+
 
   const dropLetterOn = (clickedTile: TileObj, letterObj: LetterObj) => {
 
@@ -130,10 +138,12 @@ export function useBoard() {
     let charPoints = 0;
 
     let searchId = leftmostLetteredTilesId(startTileId);
+    const yIndex = getYindexFromTileId(searchId);
 
     let tile = tiles.get(searchId);
     let word = '';
-    let char: string | undefined = tile!.letter!.char;
+    let char: string | undefined = tile?.letter?.char;
+    console.log('first char: ', char);
 
     while (char) {
 
@@ -147,23 +157,24 @@ export function useBoard() {
         if (tile!.bonus === BONUS.WSx2 || tile!.bonus === BONUS.WSx3) {
 
           // see TileObj for the division 'logic'...
-          wordBonusMultiplier *= tile!.bonus / 10;
+          wordBonusMultiplier *= (tile!.bonus / 10);
         } else if (tile!.bonus === BONUS.CENTER) {
 
-          wordBonusMultiplier *= tile!.bonus / 20;
-        } else { //  Bonus.NONE or has a letter ('char') score bonus
+          wordBonusMultiplier *= (tile!.bonus / 20);
+        } else { //  Bonus.NONE (= x1) or has a letter ('char') score bonus
           charPoints *= tile!.bonus; // x 1, 2, or 3
         }
       }
       word += char;
       wordPoints += charPoints;
 
-      char = tiles.get(++searchId)?.letter?.char;
+      tile = tiles.get(++searchId);
+      char = tile?.letter?.char;
       charPoints = 0; // prepare for next char
     } // end while-loop
     wordPoints *= wordBonusMultiplier;
 
-    return new WordResult(word, wordPoints);
+    return { wordResult: new WordResult(word, wordPoints), yIndex };
   };
 
   const getVerticalWord = (startTileId: number) => {
@@ -174,10 +185,11 @@ export function useBoard() {
     let charPoints = 0;
 
     let searchId = topmostLetteredTilesId(startTileId);
+    const xIndex = getXindexFromTileId(searchId);
 
     let tile = tiles.get(searchId);
     let word = '';
-    let char: string | undefined = tile!.letter!.char;
+    let char: string | undefined = tile?.letter?.char;
 
     while (char) {
 
@@ -191,10 +203,10 @@ export function useBoard() {
         if (tile!.bonus === BONUS.WSx2 || tile!.bonus === BONUS.WSx3) {
 
           // see TileObj for the division 'logic'...
-          wordBonusMultiplier *= tile!.bonus / 10;
+          wordBonusMultiplier *= (tile!.bonus / 10);
         } else if (tile!.bonus === BONUS.CENTER) {
 
-          wordBonusMultiplier *= tile!.bonus / 20;
+          wordBonusMultiplier *= (tile!.bonus / 20);
         } else { // Bonus.NONE or has a letter ('char') score bonus
           charPoints *= tile!.bonus; // x 1, 2, or 3
         }
@@ -202,27 +214,91 @@ export function useBoard() {
       word += char;
       wordPoints += charPoints;
 
-      char = tiles.get(searchId += VERTICAL_JUMP)?.letter?.char;
+      tile = tiles.get(searchId += VERTICAL_JUMP);
+      char = tile?.letter?.char;
       charPoints = 0; // prepare for next char
     } // end while-loop
     wordPoints *= wordBonusMultiplier;
 
-    return new WordResult(word, wordPoints);
+    return { wordResult: new WordResult(word, wordPoints), xIndex };
   };
 
   const getUnverifiedWordsAndPoints = () => {
 
-    const words = new Set<WordResult>();
+    // TODO: the new board letters need to touch each other and (as a whole) 
+    // at least one locked board letter.
+    // One way to do this: if more than 1 horizontal word, ensure their Y indexes are different;
+    // if more than 1 vertical word, ensure their X indexes are different
+
+    // TODO: blank tiles' letters need to be chosen before word evaluation,
+    // and they need to be returned to the rack (as blank!) upon Error or API verif. failure
+
+    // TODO: lock board letters upon successful word API call; otherwise, return letters
+    // to rack
+
+    let checkForCenterTile = isFirstPlay;
+    let centerTileIncluded = false;
+
+    // used for ensuring contiguous / valid words
+    const horizontalWordYindices: Set<number> = new Set();
+    const verticalWordXIndices: Set<number> = new Set();
+
+    const horizontalWords = new Set<WordResult>();
+    const verticalWords = new Set<WordResult>();
 
     newLetterTileIds.forEach(id => {
 
+      if (checkForCenterTile) {
+        if (tiles.get(id)?.bonus === BONUS.CENTER) {
+          centerTileIncluded = true;
+          checkForCenterTile = false;
+        }
+      }
+
       // a lot of duplicate operations, but who cares, the array is very small
-      words.add(getHorizontalWord(id));
-      words.add(getVerticalWord(id));
+      const horizontal = getHorizontalWord(id);
+      const vertical = getVerticalWord(id);
+
+      horizontalWordYindices.add(horizontal.yIndex);
+      verticalWordXIndices.add(vertical.xIndex);
+
+      const horizLengthOk = horizontal.wordResult.word.length > 1;
+      const vertLengthOk = vertical.wordResult.word.length > 1;
+
+      if (!horizLengthOk && !vertLengthOk) {
+        throw new Error('GAME RULE: Dangling letters are not allowed!');
+      }
+      if (horizLengthOk) {
+        horizontalWords.add(horizontal.wordResult);
+      }
+      if (vertLengthOk) {
+        verticalWords.add(vertical.wordResult);
+      }
     });
 
-    // points will only be applied if the words are valid (fulfill Dictionary API call & length > 1 char)
-    return words;
+    if (isFirstPlay && !centerTileIncluded) {
+      throw new Error('GAME RULE: First word must include the center tile (star)!');
+    }
+
+    // JS Sets are fiddly with objects, so we need to remove duplicate WordResults
+    const uniqueHorizWords = WordResult.removeDuplicateValues(horizontalWords);
+    const uniqueVertWords = WordResult.removeDuplicateValues(verticalWords);
+
+    // the words must... BLAH; this won't work after all -.-
+    if (uniqueHorizWords.size > 1) {
+      const valid = horizontalWordYindices.size > 1;
+      if (!valid) {
+        throw new Error('GAME RULE: Words must be contiguous!');
+      }
+    }
+    if (uniqueVertWords.size > 1) {
+      const valid = verticalWordXIndices.size > 1;
+      if (!valid) {
+        throw new Error('GAME RULE: Words must be contiguous!');
+      }
+    }
+
+    return WordResult.removeDuplicateValues(new Set([...uniqueHorizWords, ...uniqueVertWords]));
   };
 
   // could be part of useRack as well; matter of taste
@@ -267,7 +343,7 @@ export function useLetterPouch() {
     return letters;
   };
 
-  // used when exchanging letters
+  // keeping this for now; delete at some point
   const putLettersInPouch = (letters: LetterObj[]) => {
 
     setLetterPouch([...letterPouch, ...letters]);
@@ -285,7 +361,7 @@ export function useLetterPouch() {
     }
     const newLetters = Array.from(indices).map(index => { return letterPouch[index]; });
 
-    // remove the new drawn letters from the pouch and add the old letters
+    // remove the newly drawn letters from the pouch and add the old racked letters
     setLetterPouch([...letterPouch.filter((_, index) => { return !indices.has(index); }), ...oldLetters]);
 
     return newLetters;
@@ -310,7 +386,7 @@ export function useRack(
   exchangeLettersThroughPouch: (letters: LetterObj[]) => LetterObj[]) {
 
   // always have 7 letters (including null :p) so that the visual rack works properly
-  const capacity = 7;
+  const RACK_CAPACITY = 7;
 
   // the ids are the indices of the rack 'slots'
   const [rack, setRack] = useState<Map<number, LetterObj | null>>(
@@ -324,6 +400,7 @@ export function useRack(
 
     rack.forEach((oldLetter, slotId) => {
 
+      // TODO: get rid of either null or undefined as a possible value for the letter
       if (oldLetter === null || oldLetter === undefined) {
 
         const letterToAdd = letters[index++];
@@ -370,7 +447,7 @@ export function useRack(
   const exchangeRackLetters = (lettersToExchange: LetterObj[]) => {
 
     // Game Rule: can only exchange letters if the pouch has > 7 left
-    if (letterPouch.length <= capacity) return;
+    if (letterPouch.length <= RACK_CAPACITY) return;
 
     const newLetters = exchangeLettersThroughPouch(lettersToExchange);
 
@@ -394,4 +471,16 @@ export function useRack(
     refillRack,
     exchangeRackLetters
   };
+};
+
+// a bad consequence of storing the tileIds as a Map is the lack of a 'real' index
+const getXindexFromTileId = (id: number) => {
+
+  const rowNumber = id % 15;
+  return id - rowNumber * 15;
+};
+
+const getYindexFromTileId = (id: number) => {
+
+  return id % 15;
 };

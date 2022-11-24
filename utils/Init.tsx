@@ -3,7 +3,7 @@ import TileObj, { BONUS } from 'model/TileObj';
 
 export function initTiles(): Map<number, TileObj> {
 
-  let id = 1;
+  let id = 0;
 
   const tiles = new Map<number, TileObj>();
 
@@ -252,7 +252,7 @@ export function initTiles(): Map<number, TileObj> {
 
 export function initLetters(): LetterObj[] {
 
-  let id = 1;
+  let id = 0;
 
   return [
     new LetterObj(id++, 'A', 1),

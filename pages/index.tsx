@@ -73,6 +73,18 @@ const App: NextPage = () => {
     // TODO: pass turn
   };
 
+  const handlePlayWordsClick = () => {
+
+    try {
+      const wordResults = getUnverifiedWordsAndPoints();
+      console.log(wordResults);
+    } catch (error) {
+      const err = error as Error;
+      console.log(err.message);
+      reRackBoardLetters(addLettersToRack);
+    }
+  };
+
   // TODO: getting a little messy here... Not sure of the best solution
   const { tiles, dropLetterOn, pickUpLetterFrom, reRackBoardLetters, getUnverifiedWordsAndPoints } = useBoard();
   const { letterPouch, takeLettersFromPouch, exchangeLettersThroughPouch } = useLetterPouch();
@@ -97,7 +109,7 @@ const App: NextPage = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <ExchangeButtons letterExchangeMode={letterExchangeMode} handleActivateClick={handleActivateLetterExchangeModeClick} handleCancelClick={handleCancelLetterExchangeModeClick} handleExchangeClick={handleLetterExchangeClick} />
-      <UIButton text='Refill Rack' handleClick={refillRack} />
+      <UIButton text='Play Word(s)' handleClick={handlePlayWordsClick} />
       <Board>{
         [...tiles].map(idAndTileObjArray => {
           return <Tile key={idAndTileObjArray[0]} tileObj={idAndTileObjArray[1]} handleClick={handleTileClick} />;
