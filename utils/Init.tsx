@@ -252,7 +252,7 @@ export function initTiles(): Map<number, TileObj> {
 
 export function initLetters(): LetterObj[] {
 
-  let id = 0;
+  let id = 300; // to stop conflict with Tiles when using them as React keys
 
   return [
     new LetterObj(id++, 'A', 1),

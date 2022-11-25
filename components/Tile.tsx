@@ -1,4 +1,3 @@
-import Letter from 'components/Letter';
 import TileObj, { BONUS } from 'model/TileObj';
 
 export type TileProps = {
@@ -20,10 +19,8 @@ export default function Tile({ tileObj, handleClick }: TileProps) {
   const tileImgHeight = '50px';
 
   return (
-    <div className='flex items-center justify-center' onClick={() => handleClick(tileObj)}>
-      {tileObj.letter
-        ? <Letter letterObj={tileObj.letter} />
-        : <img src={imgUrlMap.get(tileObj.bonus)} width={tileImgWidth} height={tileImgHeight}></img>}
+    <div className='flex items-center justify-center' onClick={() => handleClick(tileObj.id)}>
+      <img src={imgUrlMap.get(tileObj.bonus)} width={tileImgWidth} height={tileImgHeight}></img>
     </div>
   );
 };

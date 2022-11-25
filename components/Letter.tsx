@@ -15,13 +15,14 @@ export default function Letter({ letterObj, handleClick, letterExchangeMode = fa
     if (!letterExchangeMode) setSelected(false);
   }, [letterExchangeMode]);
 
+  // TODO: the click method is getting too convoluted due to prop drilling
   const handleClickAndExchangeMode = () => {
 
     if (letterExchangeMode) {
       setSelected(!selected);
     }
     if (letterObj.isClickable && handleClick) {
-      handleClick(letterObj);
+      handleClick();
     }
   };
 

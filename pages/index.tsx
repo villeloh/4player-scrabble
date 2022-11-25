@@ -4,11 +4,9 @@ import { useState, useEffect } from 'react';
 import Board from 'components/Board';
 import Rack from 'components/Rack';
 import Letter from 'components/Letter';
-import Tile from 'components/Tile';
 import { useMouseMove, useLetterPouch, useBoard, useRack } from 'utils/hooks';
 import Cursor from 'components/Cursor';
 import LetterObj from 'model/LetterObj';
-import TileObj from 'model/TileObj';
 import ExchangeButtons from 'components/ExchangeButtons';
 import UIButton from 'components/UIButton';
 import PouchIndicator from 'components/PouchIndicator';
@@ -17,38 +15,40 @@ const App: NextPage = () => {
 
   const pageTitle = '4-P Scrabble';
 
-  const handleTileClick = (clickedTile: TileObj) => {
+  const handleEmptyTileClick = (tileId: number) => {
 
-    const tileContainsLetter = clickedTile.letter !== undefined;
-
-    // TODO: this could be improved for sure
-    if (!tileContainsLetter && pickedUpLetter) {
-      dropLetterOn(clickedTile, pickedUpLetter);
+    if (pickedUpLetter) {
+      addLetterOnBoard(tileId, pickedUpLetter);
       setPickedUpLetter(undefined);
-    } else if (tileContainsLetter && !pickedUpLetter) {
-      setPickedUpLetter(pickUpLetterFrom(clickedTile));
-    } else if (tileContainsLetter && pickedUpLetter) {
-      const letter = clickedTile.letter;
-      dropLetterOn(clickedTile, pickedUpLetter);
+    }
+  };
+
+  const handleBoardLetterClick = (tileId: number) => {
+
+    if (!pickedUpLetter) {
+      setPickedUpLetter(takeLetterFromBoard(tileId));
+    } else {
+      const letter = takeLetterFromBoard(tileId);
+      addLetterOnBoard(tileId, pickedUpLetter);
       setPickedUpLetter(letter);
     }
   };
 
-  const handleRackSlotClick = (slotId: number, letterOrNull: LetterObj | null) => {
+  const handleRackSlotClick = (slotId: number, letter: LetterObj | undefined) => {
 
-    if (letterExchangeMode && letterOrNull !== null) {
+    if (letterExchangeMode && letter) {
 
-      const alreadySelected = lettersToExchange.includes(letterOrNull);
+      const alreadySelected = lettersToExchange.includes(letter);
       alreadySelected
-        ? setLettersToExchange([...lettersToExchange.filter(letterObj => { return letterObj.id !== letterOrNull.id })])
-        : setLettersToExchange([...lettersToExchange, letterOrNull]);
+        ? setLettersToExchange([...lettersToExchange.filter(letterObj => { return letterObj.id !== letter.id })]) // cancel
+        : setLettersToExchange([...lettersToExchange, letter]);
     } else if (!letterExchangeMode) {
       if (pickedUpLetter) {
         addRackLetterAt(slotId, pickedUpLetter);
-        setPickedUpLetter(letterOrNull || undefined);
+        setPickedUpLetter(letter);
       } else {
         const letterToPickUp = rack.get(slotId);
-        setPickedUpLetter(letterToPickUp || undefined);
+        setPickedUpLetter(letterToPickUp);
         removeRackLetterFrom(slotId);
       }
     }
@@ -79,6 +79,7 @@ const App: NextPage = () => {
     try {
       const wordResults = getUnverifiedWordsAndPoints();
       console.log(wordResults);
+      // TODO: send request to verification API
     } catch (error) {
       const err = error as Error;
       console.log(err.message);
@@ -87,7 +88,7 @@ const App: NextPage = () => {
   };
 
   // TODO: getting a little messy here... Not sure of the best solution
-  const { tiles, dropLetterOn, pickUpLetterFrom, reRackBoardLetters, getUnverifiedWordsAndPoints } = useBoard();
+  const { tiles, boardLetters, takeLetterFromBoard, addLetterOnBoard, reRackBoardLetters, getUnverifiedWordsAndPoints } = useBoard();
   const { letterPouch, takeLettersFromPouch, exchangeLettersThroughPouch } = useLetterPouch();
   const { rack, removeRackLetterFrom, addRackLetterAt, refillRack, addLettersToRack, exchangeRackLetters } = useRack(letterPouch, takeLettersFromPouch, exchangeLettersThroughPouch);
 
@@ -97,7 +98,7 @@ const App: NextPage = () => {
 
   const { mouseX, mouseY, handleMouseMove } = useMouseMove();
 
-  // browser refresh resets the letters; fix it
+  // TODO: browser refresh resets the letters; fix it with LocalStorage
   useEffect(() => {
     // infinite rerender loop if we don't call this initially in useEffect()
     refillRack();
@@ -116,10 +117,7 @@ const App: NextPage = () => {
           <UIButton text='Play Word(s)' handleClick={handlePlayWordsClick} />
         </div>
         <div>
-          <Board>{
-            [...tiles].map(idAndTileObjArray => {
-              return <Tile key={idAndTileObjArray[0]} tileObj={idAndTileObjArray[1]} handleClick={handleTileClick} />;
-            })}</Board>
+          <Board letters={boardLetters} tiles={tiles} handleTileClick={handleEmptyTileClick} handleLetterClick={handleBoardLetterClick} />
           <Rack handleSlotClick={handleRackSlotClick} letterExchangeMode={letterExchangeMode} >
             {rack}
           </Rack>

@@ -1,4 +1,3 @@
-import LetterObj from "./LetterObj";
 
 // we need to differentiate the values, because they're just naked numbers
 export enum BONUS {
@@ -14,15 +13,11 @@ export default class TileObj {
 
   readonly id: number;
   readonly bonus: BONUS;
-  readonly letter?: LetterObj;
 
   constructor(
     id: number,
-    bonus: BONUS = BONUS.NONE,
-    letter?: LetterObj) {
-
+    bonus: BONUS = BONUS.NONE) {
     this.id = id;
     this.bonus = bonus;
-    this.letter = letter;
   }
 };

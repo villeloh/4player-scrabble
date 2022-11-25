@@ -25,112 +25,115 @@ export function useMouseMove() {
 
 export function useBoard() {
 
+  enum BOARD_ERROR {
+    NO_GAPS = 'GAME RULE: No gaps allowed between placed words!',
+    NO_ANGLES = 'GAME RULE: No angles allowed in placed words!',
+    NO_DANGLING = 'GAME RULE: No dangling letters allowed!',
+    NO_STAR = 'GAME RULE: The first word must include the center tile (star)!'
+  }
+
   // Due to using a Map<id, TileObj> to store the tiles, a jump in id number by this amount will bring us 
   // directly under the current tile on the board (a negative jump will bring us to the tile 
   // that's on top of the current tile)
   const VERTICAL_JUMP = 15;
 
-  const [tiles, setTiles] = useState(initTiles());
-  const [isFirstPlay, setIsFirstPlay] = useState(true);
-
-  // store the locations of the 'locked' letters that have been scored in the past.
-  const [lockedLetterTileIds, setLockedLetterTileIds] = useState(new Set<number>());
-
-  // letters that have been dropped on the board, but not locked on it yet
-  const [newLetterTileIds, setNewLetterTileIds] = useState(new Set<number>());
+  const [tiles] = useState(initTiles()); // I guess it could be a regular JS object now that it's static?
+  const [oldBoardLetters, setOldBoardLetters] = useState(new Map<number, LetterObj>());
+  const [newBoardLetters, setNewBoardLetters] = useState(new Map<number, LetterObj>());
+  const [boardLetters, setBoardLetters] = useState(new Map([...oldBoardLetters, ...newBoardLetters]));
 
   useEffect(() => {
-    if (isFirstPlay && lockedLetterTileIds.size > 0) {
+    setBoardLetters(new Map([...oldBoardLetters, ...newBoardLetters]));
+  }, [oldBoardLetters, newBoardLetters]);
+
+  const [isFirstPlay, setIsFirstPlay] = useState(true);
+
+  useEffect(() => {
+    if (isFirstPlay && oldBoardLetters.size > 0) {
       setIsFirstPlay(false);
     }
-  }, [lockedLetterTileIds]);
+  }, [oldBoardLetters]);
 
+  const addLetterOnBoard = (tileId: number, letterObj: LetterObj) => {
 
-  const dropLetterOn = (clickedTile: TileObj, letterObj: LetterObj) => {
-
-    const newTileWithLetter = new TileObj(clickedTile.id, clickedTile.bonus, letterObj);
-
-    // replace the old, empty tile with it
-    setTiles(new Map<number, TileObj>([...tiles, [clickedTile.id, newTileWithLetter]]));
-    setNewLetterTileIds(new Set([...newLetterTileIds, clickedTile.id]));
+    const newState = new Map(newBoardLetters);
+    newState.set(tileId, letterObj);
+    setNewBoardLetters(newState);
   };
 
-  const pickUpLetterFrom = (clickedTile: TileObj) => {
+  const takeLetterFromBoard = (tileId: number) => {
 
-    if (!clickedTile.letter) return;
+    const letter = newBoardLetters.get(tileId);
 
-    const newTileWithoutLetter = new TileObj(clickedTile.id, clickedTile.bonus, undefined);
-
-    const tilesCopy = new Map(tiles);
-    tilesCopy.set(clickedTile.id, newTileWithoutLetter);
-    setTiles(tilesCopy);
-
-    const newBoardLetterTileIds = new Set(newLetterTileIds);
-    newBoardLetterTileIds.delete(clickedTile.id);
-    setNewLetterTileIds(newBoardLetterTileIds);
-
-    return clickedTile.letter;
+    if (letter) {
+      const newState = new Map(newBoardLetters);
+      newState.delete(tileId);
+      setNewBoardLetters(newState);
+    }
+    return letter;
   };
 
   // weird staleness issue with the board visuals unless we batch the re-racking of letters
-  const pickUpLettersFrom = (givenTiles: TileObj[]) => {
+  const takeLettersFromBoard = (tileIds: number[]) => {
 
     const letters: LetterObj[] = [];
-    const newBoardLetterTileIds = new Set(newLetterTileIds);
 
-    const newTilesWithoutLetters = new Map<number, TileObj>();
+    const newState = new Map(newBoardLetters);
 
-    givenTiles.forEach(tile => {
+    tileIds.forEach(id => {
 
-      if (tile.letter) {
-        const newTileWithoutLetters = new TileObj(tile.id, tile.bonus, undefined);
-        newTilesWithoutLetters.set(tile.id, newTileWithoutLetters);
-        newBoardLetterTileIds.delete(tile.id);
-        letters.push(tile.letter);
+      const letter = newBoardLetters.get(id);
+
+      if (letter) {
+        newState.delete(id);
+        letters.push(letter);
       }
     });
-    const newTiles = new Map([...tiles, ...newTilesWithoutLetters]);
-    setTiles(newTiles);
-    setNewLetterTileIds(newBoardLetterTileIds);
-
+    setNewBoardLetters(newState);
     return letters;
   };
 
   const lockBoardLetters = () => {
 
-    setLockedLetterTileIds(new Set<number>([...lockedLetterTileIds, ...newLetterTileIds]));
-    setNewLetterTileIds(new Set<number>());
+    setOldBoardLetters(new Map([...oldBoardLetters, ...newBoardLetters]));
+    setNewBoardLetters(new Map());
   };
 
   const leftmostLetteredTilesId = (searchId: number) => {
 
     let leftmostId = searchId;
 
-    let isLetterToTheLeft = tiles.get(--searchId)?.letter !== undefined;
+    const allLetters = new Map([...oldBoardLetters, ...newBoardLetters]);
+
+    let isLetterToTheLeft = allLetters.get(--searchId) !== undefined;
 
     while (isLetterToTheLeft) {
 
-      leftmostId = tiles.get(searchId)!.id;
-      isLetterToTheLeft = tiles.get(--searchId)?.letter !== undefined;
+      leftmostId = searchId;
+      isLetterToTheLeft = allLetters.get(--searchId) !== undefined;
     }
-    return leftmostId;
+    return leftmostId; // id of leftmost tile that still had a letter on it
   };
 
   const topmostLetteredTilesId = (searchId: number) => {
 
     let topmostId = searchId;
 
-    let isLetterUp = tiles.get(searchId - VERTICAL_JUMP)?.letter !== undefined;
+    const allLetters = new Map([...oldBoardLetters, ...newBoardLetters]);
+
+    let isLetterUp = allLetters.get(searchId - VERTICAL_JUMP) !== undefined;
 
     while (isLetterUp) {
 
-      topmostId = tiles.get(searchId)!.id;
-      isLetterUp = tiles.get(searchId -= VERTICAL_JUMP)?.letter !== undefined;
+      topmostId = searchId;
+      isLetterUp = allLetters.get(searchId -= VERTICAL_JUMP) !== undefined;
     }
-    return topmostId;
+    return topmostId; // id of topmost tile that still had a letter on it
   };
 
   const getHorizontalWord = (startTileId: number) => {
+
+    const allLetters = new Map([...oldBoardLetters, ...newBoardLetters]);
 
     let wordPoints = 0;
     let wordBonusMultiplier = 1;
@@ -139,19 +142,21 @@ export function useBoard() {
 
     let searchId = leftmostLetteredTilesId(startTileId);
 
-    let tile = tiles.get(searchId);
+    let letter = allLetters.get(searchId);
     let word = '';
-    let char: string | undefined = tile?.letter?.char;
 
-    while (char) {
+    while (letter) {
 
       // base value without any bonuses
-      charPoints += tile!.letter!.value;
+      charPoints += letter.value;
 
-      const isNewChar = !lockedLetterTileIds.has(searchId);
+      const isNewChar = !oldBoardLetters.has(searchId);
 
       // old chars' bonuses are not applied
       if (isNewChar) {
+
+        const tile = tiles.get(searchId);
+
         if (tile!.bonus === BONUS.WSx2 || tile!.bonus === BONUS.WSx3) {
 
           // see TileObj for the division 'logic'...
@@ -163,11 +168,10 @@ export function useBoard() {
           charPoints *= tile!.bonus; // x 1, 2, or 3
         }
       }
-      word += char;
+      word += letter.char;
       wordPoints += charPoints;
 
-      tile = tiles.get(++searchId);
-      char = tile?.letter?.char;
+      letter = allLetters.get(++searchId);
       charPoints = 0; // prepare for next char
     } // end while-loop
     wordPoints *= wordBonusMultiplier;
@@ -177,6 +181,8 @@ export function useBoard() {
 
   const getVerticalWord = (startTileId: number) => {
 
+    const allLetters = new Map([...oldBoardLetters, ...newBoardLetters]);
+
     let wordPoints = 0;
     let wordBonusMultiplier = 1;
 
@@ -184,19 +190,21 @@ export function useBoard() {
 
     let searchId = topmostLetteredTilesId(startTileId);
 
-    let tile = tiles.get(searchId);
+    let letter = allLetters.get(searchId);
     let word = '';
-    let char: string | undefined = tile?.letter?.char;
 
-    while (char) {
+    while (letter) {
 
       // base value without any bonuses
-      charPoints += tile!.letter!.value;
+      charPoints += letter.value;
 
-      const isNewChar = !lockedLetterTileIds.has(searchId);
+      const isNewChar = !oldBoardLetters.has(searchId);
 
       // old chars' bonuses are not applied
       if (isNewChar) {
+
+        const tile = tiles.get(searchId);
+
         if (tile!.bonus === BONUS.WSx2 || tile!.bonus === BONUS.WSx3) {
 
           // see TileObj for the division 'logic'...
@@ -208,11 +216,10 @@ export function useBoard() {
           charPoints *= tile!.bonus; // x 1, 2, or 3
         }
       }
-      word += char;
+      word += letter.char;
       wordPoints += charPoints;
 
-      tile = tiles.get(searchId += VERTICAL_JUMP);
-      char = tile?.letter?.char;
+      letter = allLetters.get(searchId += VERTICAL_JUMP);
       charPoints = 0; // prepare for next char
     } // end while-loop
     wordPoints *= wordBonusMultiplier;
@@ -223,7 +230,7 @@ export function useBoard() {
   // a monstrosity of side effects... But it kind of makes sense to do the initial word validation here
   const getUnverifiedWordsAndPoints = () => {
 
-    // TODO: the new board letters need to touch at least one locked board letter.
+    // TODO: the new board letters need to touch at least one old board letter.
 
     // TODO: blank tiles' letters need to be chosen before word evaluation,
     // and they need to be returned to the rack (as blank!) upon Error or API verif. failure
@@ -242,7 +249,7 @@ export function useBoard() {
 
     const words = new Set<WordResult>();
 
-    newLetterTileIds.forEach(id => {
+    newBoardLetters.forEach((_, id) => {
 
       if (checkForCenterTile) {
         if (tiles.get(id)?.bonus === BONUS.CENTER) {
@@ -259,7 +266,7 @@ export function useBoard() {
       const vertLengthOk = vertical.word.length > 1;
 
       if (!horizLengthOk && !vertLengthOk) {
-        throw new Error('GAME RULE: Dangling letters are not allowed!');
+        throw new Error(BOARD_ERROR.NO_DANGLING);
       }
       if (horizLengthOk) {
         words.add(horizontal);
@@ -270,7 +277,7 @@ export function useBoard() {
     }); // end forEach
 
     if (isFirstPlay && !centerTileIncluded) {
-      throw new Error('GAME RULE: First word must include the center tile (star)!');
+      throw new Error(BOARD_ERROR.NO_STAR);
     }
     return WordResult.removeDuplicateValues(words);
   };
@@ -282,7 +289,7 @@ export function useBoard() {
     const xArr: any[] = [];
     const yArr: any[] = [];
 
-    newLetterTileIds.forEach(tileId => {
+    newBoardLetters.forEach((_, tileId) => {
 
       const x = getXindexFromTileId(tileId);
       const y = getYindexFromTileId(tileId);
@@ -296,8 +303,7 @@ export function useBoard() {
     let xIdentical = true;
     let yIdentical = true;
 
-    // -2 on purpose
-    for (let i = 0; i < xArr.length - 2; i++) {
+    for (let i = 0; i < xArr.length - 1; i++) {
       const xValue = xArr[i].x;
       const rightNeighborXvalue = xArr[i + 1].x;
 
@@ -315,16 +321,15 @@ export function useBoard() {
         inbetweenTileIds.forEach(id => {
 
           // any gaps between the new letters need to have 'old' board letters in them
-          if (!lockedLetterTileIds.has(id)) {
+          if (!oldBoardLetters.has(id)) {
             // early return is a bit unclear, but just to make this *slightly* more efficient
-            throw new Error('GAME RULE: No gaps allowed between placed words!');
+            throw new Error(BOARD_ERROR.NO_GAPS);
           }
         });
       }
     } // end x-sorted for-loop
 
-    // -2 on purpose
-    for (let i = 0; i < yArr.length - 2; i++) {
+    for (let i = 0; i < yArr.length - 1; i++) {
       const yValue = yArr[i].y;
       const downNeighborYvalue = yArr[i + 1].y;
 
@@ -342,35 +347,28 @@ export function useBoard() {
         inbetweenTileIds.forEach(id => {
 
           // any gaps between the new letters need to have 'old' board letters in them
-          if (!lockedLetterTileIds.has(id)) {
+          if (!oldBoardLetters.has(id)) {
             // early return is a bit unclear, but just to make this *slightly* more efficient
-            throw new Error('GAME RULE: No gaps allowed between placed words!');
+            throw new Error(BOARD_ERROR.NO_GAPS);
           }
         });
       }
     } // end y-sorted for-loop
 
     // the letters must be in a straight line either vertically or horizontally
-    if (!xIdentical || !yIdentical) {
-      throw new Error('GAME RULE: No angles allowed within placed words!');
+    if (!(xIdentical || yIdentical)) {
+      throw new Error(BOARD_ERROR.NO_ANGLES);
     }
   };
 
   // could be part of useRack as well; matter of taste
   const reRackBoardLetters = (addLettersToRack: Function) => {
 
-    const tilesToReRack: TileObj[] = [];
-
-    newLetterTileIds.forEach(id => {
-
-      tilesToReRack.push(tiles.get(id)!);
-    });
-
-    const letters = pickUpLettersFrom(tilesToReRack);
+    const letters = takeLettersFromBoard([...newBoardLetters.keys()]);
     addLettersToRack(letters);
   };
 
-  return { tiles, dropLetterOn, pickUpLetterFrom, lockBoardLetters, reRackBoardLetters, getUnverifiedWordsAndPoints };
+  return { tiles, boardLetters, addLetterOnBoard, takeLetterFromBoard, lockBoardLetters, reRackBoardLetters, getUnverifiedWordsAndPoints };
 };
 
 export function useLetterPouch() {
@@ -444,19 +442,18 @@ export function useRack(
   const RACK_CAPACITY = 7;
 
   // the ids are the indices of the rack 'slots'
-  const [rack, setRack] = useState<Map<number, LetterObj | null>>(
-    new Map([[0, null], [1, null], [2, null], [3, null], [4, null], [5, null], [6, null]])
+  const [rack, setRack] = useState<Map<number, LetterObj | undefined>>(
+    new Map([[0, undefined], [1, undefined], [2, undefined], [3, undefined], [4, undefined], [5, undefined], [6, undefined]])
   );
 
   const addLettersToRack = (letters: LetterObj[]) => {
 
-    const newRack = new Map<number, LetterObj | null>(rack);
+    const newRack = new Map<number, LetterObj | undefined>(rack);
     let index = 0;
 
     rack.forEach((oldLetter, slotId) => {
 
-      // TODO: get rid of either null or undefined as a possible value for the letter
-      if (oldLetter === null || oldLetter === undefined) {
+      if (!oldLetter) {
 
         const letterToAdd = letters[index++];
 
@@ -472,15 +469,15 @@ export function useRack(
 
   const removeRackLetterFrom = (slotId: number) => {
 
-    const rackCopy = new Map<number, LetterObj | null>(rack);
-    rackCopy.set(slotId, null);
+    const rackCopy = new Map<number, LetterObj | undefined>(rack);
+    rackCopy.set(slotId, undefined);
 
     setRack(rackCopy);
   };
 
   const addRackLetterAt = (slotId: number, letterObj: LetterObj) => {
 
-    const rackCopy = new Map<number, LetterObj | null>(rack);
+    const rackCopy = new Map<number, LetterObj | undefined>(rack);
 
     rackCopy.set(slotId, letterObj);
     setRack(rackCopy);
@@ -505,7 +502,7 @@ export function useRack(
 
     const newLetters = exchangeLettersThroughPouch(lettersToExchange);
 
-    const rackCopy = new Map<number, LetterObj | null>(rack);
+    const rackCopy = new Map<number, LetterObj | undefined>(rack);
 
     let index = 0;
     rack.forEach((letterObj, id) => {
@@ -526,6 +523,8 @@ export function useRack(
     exchangeRackLetters
   };
 };
+
+// ==================== HELPERS =======================================================
 
 // a bad consequence of storing the tileIds as a Map is the lack of a 'real' index
 const getXindexFromTileId = (id: number) => {

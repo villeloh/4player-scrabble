@@ -3,7 +3,7 @@ import { useState } from "react";
 import Letter from "./Letter";
 
 type RackProps = {
-  children: Map<number, LetterObj | null>;
+  children: Map<number, LetterObj | undefined>;
   handleSlotClick: Function;
   letterExchangeMode: boolean;
 };
@@ -29,7 +29,7 @@ export default function Rack({ children, handleSlotClick, letterExchangeMode }: 
 
 type RackSlotProps = {
   slotId: number;
-  letterObj: LetterObj | null;
+  letterObj: LetterObj | undefined;
   handleClick: Function;
   letterExchangeMode: boolean;
 };
