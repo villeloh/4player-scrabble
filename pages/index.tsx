@@ -9,7 +9,8 @@ import Cursor from 'components/Cursor';
 import LetterObj from 'model/LetterObj';
 import ExchangeButtons from 'components/ExchangeButtons';
 import UIButton from 'components/UIButton';
-import PouchIndicator from 'components/PouchIndicator';
+import PouchIndicator from 'components/PouchControls';
+import PouchControls from 'components/PouchControls';
 
 const App: NextPage = () => {
 
@@ -104,6 +105,7 @@ const App: NextPage = () => {
     refillRack();
   }, []);
 
+  // TODO: prop drilling is getting out of control (PouchControls has 3 levels)
   return (
     <div onMouseMove={handleMouseMove} className="relative">
       <Head>
@@ -112,8 +114,12 @@ const App: NextPage = () => {
       </Head>
       <div className='flex flex-row justify-center'>
         <div className='mt-16 flex flex-col gap-7'>
-          <PouchIndicator letterPouch={letterPouch} />
-          <ExchangeButtons letterExchangeMode={letterExchangeMode} handleActivateClick={handleActivateLetterExchangeModeClick} handleCancelClick={handleCancelLetterExchangeModeClick} handleExchangeClick={handleLetterExchangeClick} />
+          <PouchControls letterPouch={letterPouch} letterExchangeMode={letterExchangeMode}
+            handleActivateClick={handleActivateLetterExchangeModeClick}
+            handleCancelClick={handleCancelLetterExchangeModeClick}
+            handleExchangeClick={handleLetterExchangeClick}
+            canExchangeLetters={lettersToExchange.length > 0}
+          />
           <UIButton text='Play Word(s)' handleClick={handlePlayWordsClick} />
         </div>
         <div>

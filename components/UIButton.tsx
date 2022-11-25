@@ -1,13 +1,18 @@
 
 type UIButtonProps = {
   text?: string;
+  color?: string;
   handleClick: Function;
+  enabled?: boolean;
 };
 
-export default function UIButton({ text, handleClick }: UIButtonProps) {
+export default function UIButton({ text, handleClick, color = 'bg-slate-400', enabled = true }: UIButtonProps) {
+
+  const disabledColor = 'bg-gray-300';
+  const btnColor = enabled ? color : disabledColor;
 
   return (
-    <button className="p-2 rounded-lg bg-slate-400 w-fit" onClick={() => handleClick()}>
+    <button disabled={!enabled} className={`p-2 rounded-lg ${btnColor} w-fit`} onClick={() => handleClick()}>
       {text}
     </button>
   );
