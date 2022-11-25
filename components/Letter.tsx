@@ -29,7 +29,7 @@ export default function Letter({ letterObj, handleClick, letterExchangeMode = fa
   const selectedStyles = selected ? 'border-4 border-yellow-400' : '';
 
   return (
-    <div className={`bg-[#d0bf7d] w-[41px] h-[45px] relative rounded-lg shadow-2xl ${selectedStyles}`} onClick={() => handleClickAndExchangeMode()}>
+    <div className={`bg-[#d0bf7d] mt-[2px] ml-[2px] w-[41px] h-[45px] relative rounded-lg shadow-2xl flex items-center justify-center ${selectedStyles}`} onClick={() => handleClickAndExchangeMode()}>
       <h1 className="absolute top-[15px] left-1/3 w-fit h-fit leading-3 text-lg cursor-default select-none">{letterObj.char}</h1>
       <h2 className="absolute bottom-0.5 right-0.5 text-sm cursor-default select-none">{letterObj.value}</h2>
     </div>

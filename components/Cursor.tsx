@@ -10,8 +10,8 @@ type CursorProps = {
 export default function Cursor({ children, mouseX, mouseY }: CursorProps) {
 
   // for some reason, the rendered item is off-center to start with
-  const yOffset = 45;
-  const xOffset = 20;
+  const yOffset = 22;
+  const xOffset = 22;
 
   const cursorRef = useRef<HTMLDivElement>(null);
 

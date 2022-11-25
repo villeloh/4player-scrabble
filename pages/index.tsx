@@ -78,9 +78,12 @@ const App: NextPage = () => {
   const handlePlayWordsClick = () => {
 
     try {
-      const wordResults = getUnverifiedWordsAndPoints();
-      console.log(wordResults);
+      const { words, points } = getUnverifiedWordsAndPoints();
+      console.log(words);
+      console.log('points: ', points);
       // TODO: send request to verification API
+      // TODO: lock board letters upon verif. success
+
     } catch (error) {
       const err = error as Error;
       console.log(err.message);
@@ -118,7 +121,7 @@ const App: NextPage = () => {
             handleActivateClick={handleActivateLetterExchangeModeClick}
             handleCancelClick={handleCancelLetterExchangeModeClick}
             handleExchangeClick={handleLetterExchangeClick}
-            canExchangeLetters={lettersToExchange.length > 0}
+            lettersSelected={lettersToExchange.length > 0}
           />
           <UIButton text='Play Word(s)' handleClick={handlePlayWordsClick} />
         </div>

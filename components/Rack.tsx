@@ -1,5 +1,4 @@
 import LetterObj from "model/LetterObj";
-import { useState } from "react";
 import Letter from "./Letter";
 
 type RackProps = {
@@ -19,7 +18,7 @@ export default function Rack({ children, handleSlotClick, letterExchangeMode }: 
   return (
     <div className="flex flex-row items-center justify-center mt-2">
       <div className="bg-sky-800 w-fit h-fit items-center justify-center rounded-md">
-        <div className='m-2 flex flex-row bg-[#2e9bd5] w-[350px] h-[60px] p-2 justify-start items-center rounded-md pt-3 pb-2 space-x-2 shadow-inner'>
+        <div className='m-2 flex flex-row bg-[#2e9bd5] w-[370px] h-[60px] p-2 justify-start items-center rounded-md pt-3 pb-3 space-x-2 shadow-inner'>
           {rackSlots}
         </div >
       </div>

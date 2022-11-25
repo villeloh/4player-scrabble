@@ -29,7 +29,9 @@ export function useBoard() {
     NO_GAPS = 'GAME RULE: No gaps allowed between placed words!',
     NO_ANGLES = 'GAME RULE: No angles allowed in placed words!',
     NO_DANGLING = 'GAME RULE: No dangling letters allowed!',
-    NO_STAR = 'GAME RULE: The first word must include the center tile (star)!'
+    INCLUDE_STAR = 'GAME RULE: The first word must include the center tile (star)!',
+    TOUCH_OLD_WORD = 'GAME RULE: All new words must touch at least one old word!'
+
   }
 
   // Due to using a Map<id, TileObj> to store the tiles, a jump in id number by this amount will bring us 
@@ -230,10 +232,9 @@ export function useBoard() {
   // a monstrosity of side effects... But it kind of makes sense to do the initial word validation here
   const getUnverifiedWordsAndPoints = () => {
 
-    // TODO: the new board letters need to touch at least one old board letter.
-
-    // TODO: blank tiles' letters need to be chosen before word evaluation,
-    // and they need to be returned to the rack (as blank!) upon Error or API verif. failure
+    // TODO: blank tiles' letters need to be chosen upon board placement,
+    // and they need to be returned to the rack upon Error (as blank) or API verif. failure 
+    // (with their selected char locked in)
 
     // TODO: lock board letters upon successful word API call; otherwise, return letters to rack
 
@@ -247,7 +248,7 @@ export function useBoard() {
     let checkForCenterTile = isFirstPlay;
     let centerTileIncluded = false;
 
-    const words = new Set<WordResult>();
+    let words = new Set<WordResult>();
 
     newBoardLetters.forEach((_, id) => {
 
@@ -277,18 +278,28 @@ export function useBoard() {
     }); // end forEach
 
     if (isFirstPlay && !centerTileIncluded) {
-      throw new Error(BOARD_ERROR.NO_STAR);
+      throw new Error(BOARD_ERROR.INCLUDE_STAR);
     }
-    return WordResult.removeDuplicateValues(words);
+
+    words = WordResult.removeDuplicateValues(words);
+
+    let points = [...words].map(wordResult => wordResult.points).reduce((prev, curr) => prev + curr);
+    if (newBoardLetters.size === 7) {
+      points += 50; // using all 7 letters at once gives 50 bonus points
+    }
+    const wordsToReturn = [...words].map(wordResult => wordResult.word);
+
+    return { words: wordsToReturn, points };
   };
 
-  // validate regarding gaps and angle containment
+  // validate regarding gaps, adjacency to old board letters, and angle containment
   // TODO: combine the monster for-loops somehow
   const validateNewLetterPlacement = () => {
 
     const xArr: any[] = [];
     const yArr: any[] = [];
 
+    // we need actual coordinates to easily do the needed operations
     newBoardLetters.forEach((_, tileId) => {
 
       const x = getXindexFromTileId(tileId);
@@ -296,7 +307,7 @@ export function useBoard() {
       xArr.push({ x, y });
       yArr.push({ y, x });
     });
-
+    // sort ascending
     xArr.sort((a, b) => a.x - b.x);
     yArr.sort((a, b) => a.y - b.y);
 
@@ -358,6 +369,27 @@ export function useBoard() {
     // the letters must be in a straight line either vertically or horizontally
     if (!(xIdentical || yIdentical)) {
       throw new Error(BOARD_ERROR.NO_ANGLES);
+    }
+
+    if (!isFirstPlay) {
+
+      let atLeastOneNewLetterAdjacentToOld = false;
+
+      newBoardLetters.forEach((_, tileId) => {
+
+        const leftOld = oldBoardLetters.get(tileId - 1) !== undefined;
+        const rightOld = oldBoardLetters.get(tileId + 1) !== undefined;
+        const topOld = oldBoardLetters.get(tileId - VERTICAL_JUMP) !== undefined;
+        const downOld = oldBoardLetters.get(tileId + VERTICAL_JUMP) !== undefined;
+
+        if (!atLeastOneNewLetterAdjacentToOld) {
+
+          atLeastOneNewLetterAdjacentToOld = leftOld || rightOld || topOld || downOld;
+        }
+      });
+      if (!atLeastOneNewLetterAdjacentToOld) {
+        throw new Error(BOARD_ERROR.TOUCH_OLD_WORD);
+      }
     }
   };
 

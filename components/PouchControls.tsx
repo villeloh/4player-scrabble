@@ -7,13 +7,13 @@ type PouchControlsProps = {
   handleActivateClick: Function;
   handleCancelClick: Function;
   handleExchangeClick: Function;
-  canExchangeLetters: boolean;
+  lettersSelected: boolean;
 };
 
 export default function PouchControls({
   letterPouch, letterExchangeMode,
   handleActivateClick, handleCancelClick,
-  handleExchangeClick, canExchangeLetters }: PouchControlsProps) {
+  handleExchangeClick, lettersSelected }: PouchControlsProps) {
 
   const imgUrl = '/pouch.png';
 
@@ -38,7 +38,7 @@ export default function PouchControls({
       <h2 className="cursor-default select-none mt-2">{pouchText}</h2>
       <div className="mt-6">
         <ExchangeButtons letterExchangeMode={letterExchangeMode} handleActivateClick={handleActivateClick}
-          handleCancelClick={handleCancelClick} handleExchangeClick={handleExchangeClick} canExchange={canExchangeLetters}
+          handleCancelClick={handleCancelClick} handleExchangeClick={handleExchangeClick} canActivate={letterPouch.length > 6} canExchange={lettersSelected}
         />
       </div>
     </div>
