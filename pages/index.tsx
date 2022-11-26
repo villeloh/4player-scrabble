@@ -7,9 +7,7 @@ import Letter from 'components/Letter';
 import { useMouseMove, useLetterPouch, useBoard, useRack } from 'utils/hooks';
 import Cursor from 'components/Cursor';
 import LetterObj from 'model/LetterObj';
-import ExchangeButtons from 'components/ExchangeButtons';
 import UIButton from 'components/UIButton';
-import PouchIndicator from 'components/PouchControls';
 import PouchControls from 'components/PouchControls';
 
 const App: NextPage = () => {

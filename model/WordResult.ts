@@ -31,14 +31,14 @@ export default class WordResult {
   static removeDuplicateValues(set: Set<WordResult>): Set<WordResult> {
 
     const arr = [...set].map(wordResult => {
-      return wordResult.toString()
+      return wordResult.toString();
     });
 
     // remove duplicates with value comparison
     const uniqueStrSet = new Set(arr);
 
     return new Set([...uniqueStrSet].map(str => {
-      return WordResult.fromString(str)
+      return WordResult.fromString(str);
     }));
   };
 };

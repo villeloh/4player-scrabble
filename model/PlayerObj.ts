@@ -1,5 +1,12 @@
 import LetterObj from "./LetterObj";
 
+export enum PLAYER_COLOR {
+  BLUE = 'blue',
+  GREEN = 'green',
+  RED = 'red',
+  YELLOW = 'yellow'
+};
+
 // Server-side object that is kept in memory
 export default class PlayerObj {
 

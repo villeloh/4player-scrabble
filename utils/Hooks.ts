@@ -1,11 +1,10 @@
 import { initLetters, initTiles } from './init';
 import { useState, MouseEvent, useEffect } from 'react';
-import TileObj, { BONUS } from 'model/TileObj';
 import LetterObj from 'model/LetterObj';
 import WordResult from 'model/WordResult';
+import { TileBonus, BONUSES } from 'model/TileObj';
 
-// Technically, the initX() calls should be given as arguments at the hook callsite,
-// but their static nature means they can be called here just as well
+// TODO: think about using useReducer() in some hooks
 
 export function useMouseMove() {
 
@@ -31,7 +30,6 @@ export function useBoard() {
     NO_DANGLING = 'GAME RULE: No dangling letters allowed!',
     INCLUDE_STAR = 'GAME RULE: The first word must include the center tile (star)!',
     TOUCH_OLD_WORD = 'GAME RULE: All new words must touch at least one old word!'
-
   }
 
   // Due to using a Map<id, TileObj> to store the tiles, a jump in id number by this amount will bring us 
@@ -50,6 +48,7 @@ export function useBoard() {
 
   const [isFirstPlay, setIsFirstPlay] = useState(true);
 
+  // TODO: think of a better way to do this
   useEffect(() => {
     if (isFirstPlay && oldBoardLetters.size > 0) {
       setIsFirstPlay(false);
@@ -159,15 +158,11 @@ export function useBoard() {
 
         const tile = tiles.get(searchId);
 
-        if (tile!.bonus === BONUS.WSx2 || tile!.bonus === BONUS.WSx3) {
+        if (tile!.bonus === 'WSx2' || tile!.bonus === 'WSx3' || tile!.bonus === 'CENTER') {
 
-          // see TileObj for the division 'logic'...
-          wordBonusMultiplier *= (tile!.bonus / 10);
-        } else if (tile!.bonus === BONUS.CENTER) {
-
-          wordBonusMultiplier *= (tile!.bonus / 20);
+          wordBonusMultiplier *= (BONUSES[tile!.bonus]);
         } else { //  Bonus.NONE (= x1) or has a letter ('char') score bonus
-          charPoints *= tile!.bonus; // x 1, 2, or 3
+          charPoints *= BONUSES[tile!.bonus]; // x 1, 2, or 3
         }
       }
       word += letter.char;
@@ -207,15 +202,11 @@ export function useBoard() {
 
         const tile = tiles.get(searchId);
 
-        if (tile!.bonus === BONUS.WSx2 || tile!.bonus === BONUS.WSx3) {
+        if (tile!.bonus === 'WSx2' || tile!.bonus === 'WSx3' || tile!.bonus === 'CENTER') {
 
-          // see TileObj for the division 'logic'...
-          wordBonusMultiplier *= (tile!.bonus / 10);
-        } else if (tile!.bonus === BONUS.CENTER) {
-
-          wordBonusMultiplier *= (tile!.bonus / 20);
+          wordBonusMultiplier *= (BONUSES[tile!.bonus]);
         } else { // Bonus.NONE or has a letter ('char') score bonus
-          charPoints *= tile!.bonus; // x 1, 2, or 3
+          charPoints *= BONUSES[tile!.bonus]; // x 1, 2, or 3
         }
       }
       word += letter.char;
@@ -229,7 +220,7 @@ export function useBoard() {
     return new WordResult(word, wordPoints);
   };
 
-  // a monstrosity of side effects... But it kind of makes sense to do the initial word validation here
+  // TODO: tidy this up somehow
   const getUnverifiedWordsAndPoints = () => {
 
     // TODO: blank tiles' letters need to be chosen upon board placement,
@@ -253,7 +244,7 @@ export function useBoard() {
     newBoardLetters.forEach((_, id) => {
 
       if (checkForCenterTile) {
-        if (tiles.get(id)?.bonus === BONUS.CENTER) {
+        if (tiles.get(id)?.bonus === 'CENTER') {
           centerTileIncluded = true;
           checkForCenterTile = false;
         }
@@ -400,7 +391,10 @@ export function useBoard() {
     addLettersToRack(letters);
   };
 
-  return { tiles, boardLetters, addLetterOnBoard, takeLetterFromBoard, lockBoardLetters, reRackBoardLetters, getUnverifiedWordsAndPoints };
+  return {
+    tiles, boardLetters, addLetterOnBoard, takeLetterFromBoard,
+    lockBoardLetters, reRackBoardLetters, getUnverifiedWordsAndPoints
+  };
 };
 
 export function useLetterPouch() {
@@ -426,12 +420,6 @@ export function useLetterPouch() {
     setLetterPouch([...letterPouch.filter((_, index) => { return !indices.has(index); })]);
 
     return letters;
-  };
-
-  // keeping this for now; delete at some point
-  const putLettersInPouch = (letters: LetterObj[]) => {
-
-    setLetterPouch([...letterPouch, ...letters]);
   };
 
   // we need an atomic state update to avoid inconsistent state
@@ -470,7 +458,7 @@ export function useRack(
   takeLettersFromPouch: (amount: number) => LetterObj[],
   exchangeLettersThroughPouch: (letters: LetterObj[]) => LetterObj[]) {
 
-  // always have 7 letters (including null :p) so that the visual rack works properly
+  // always have 7 letters (including undefined :p) so that the visual rack works properly
   const RACK_CAPACITY = 7;
 
   // the ids are the indices of the rack 'slots'

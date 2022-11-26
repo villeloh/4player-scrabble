@@ -1,4 +1,4 @@
-import PlayerOrder from "utils/PlayerOrder";
+import PlayerOrder from "model/PlayerOrder";
 import PlayerObj from "./PlayerObj";
 
 enum GameState {
