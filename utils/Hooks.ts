@@ -2,7 +2,7 @@ import { initLetters, initTiles } from './init';
 import { useState, MouseEvent, useEffect } from 'react';
 import LetterObj from 'model/LetterObj';
 import WordResult from 'model/WordResult';
-import { TileBonus, BONUSES } from 'model/TileObj';
+import { MULTIPLIER } from 'model/TileObj';
 
 // TODO: think about using useReducer() in some hooks
 
@@ -160,9 +160,9 @@ export function useBoard() {
 
         if (tile!.bonus === 'WSx2' || tile!.bonus === 'WSx3' || tile!.bonus === 'CENTER') {
 
-          wordBonusMultiplier *= (BONUSES[tile!.bonus]);
+          wordBonusMultiplier *= MULTIPLIER[tile!.bonus];
         } else { //  Bonus.NONE (= x1) or has a letter ('char') score bonus
-          charPoints *= BONUSES[tile!.bonus]; // x 1, 2, or 3
+          charPoints *= MULTIPLIER[tile!.bonus]; // x 1, 2, or 3
         }
       }
       word += letter.char;
@@ -204,9 +204,9 @@ export function useBoard() {
 
         if (tile!.bonus === 'WSx2' || tile!.bonus === 'WSx3' || tile!.bonus === 'CENTER') {
 
-          wordBonusMultiplier *= (BONUSES[tile!.bonus]);
+          wordBonusMultiplier *= MULTIPLIER[tile!.bonus];
         } else { // Bonus.NONE or has a letter ('char') score bonus
-          charPoints *= BONUSES[tile!.bonus]; // x 1, 2, or 3
+          charPoints *= MULTIPLIER[tile!.bonus]; // x 1, 2, or 3
         }
       }
       word += letter.char;

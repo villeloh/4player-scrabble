@@ -1,5 +1,5 @@
 
-export const BONUSES: Record<TileBonus, number> = {
+export const MULTIPLIER: Record<TileBonus, number> = {
   NONE: 1,
   WSx2: 2,
   WSx3: 3,
