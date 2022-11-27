@@ -232,8 +232,7 @@ export function useBoard() {
   // TODO: tidy this up somehow
   const getUnverifiedWordsAndPoints = () => {
 
-    // TODO: blank tiles' letters need to be chosen upon board placement,
-    // and they need to be returned to the rack upon Error (as blank) or API verif. failure 
+    // TODO: blank letters need to be returned to the rack upon API verif. failure 
     // (with their selected char locked in)
 
     // TODO: lock board letters upon successful word API call; otherwise, return letters to rack
@@ -278,7 +277,7 @@ export function useBoard() {
     }); // end forEach
 
     if (isFirstPlay && !centerTileIncluded) {
-      // throw new Error(BOARD_ERROR.INCLUDE_CENTER);
+      throw new Error(BOARD_ERROR.INCLUDE_CENTER);
     }
 
     words = WordResult.removeDuplicateValues(words);
@@ -581,8 +580,6 @@ const getYindexFromTileId = (id: number) => {
 };
 
 const getTileIdFromCoords = (coords: { x: number, y: number }) => {
-  // console.log('x: ', coords.x);
-  // console.log('y: ', coords.y);
   return coords.x + coords.y * 15;
 };
 
