@@ -54,6 +54,7 @@ const GamePage: NextPage = () => {
   };
 
   const handleActivateLetterExchangeModeClick = () => {
+    if (pickedUpLetter) return;
 
     setLetterExchangeMode(true);
     reRackBoardLetters(addLettersToRack);
@@ -66,6 +67,7 @@ const GamePage: NextPage = () => {
   };
 
   const handleLetterExchangeClick = () => {
+    if (pickedUpLetter) return;
 
     exchangeRackLetters(lettersToExchange);
     setLettersToExchange([]);
@@ -74,6 +76,7 @@ const GamePage: NextPage = () => {
   };
 
   const handlePlayWordsClick = () => {
+    if (pickedUpLetter) return;
 
     try {
       const { words, points } = getUnverifiedWordsAndPoints();
