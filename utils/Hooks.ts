@@ -25,10 +25,11 @@ export function useMouseMove() {
 export function useBoard() {
 
   enum BOARD_ERROR {
+    NO_BLANK = 'GAME RULE: Please select a character for all blank Letters!',
     NO_GAPS = 'GAME RULE: No gaps allowed between placed words!',
     NO_ANGLES = 'GAME RULE: No angles allowed in placed words!',
     NO_DANGLING = 'GAME RULE: No dangling letters allowed!',
-    INCLUDE_STAR = 'GAME RULE: The first word must include the center tile (star)!',
+    INCLUDE_CENTER = 'GAME RULE: The first word must include the center tile (star)!',
     TOUCH_OLD_WORD = 'GAME RULE: All new words must touch at least one old word!'
   }
 
@@ -269,7 +270,7 @@ export function useBoard() {
     }); // end forEach
 
     if (isFirstPlay && !centerTileIncluded) {
-      throw new Error(BOARD_ERROR.INCLUDE_STAR);
+      throw new Error(BOARD_ERROR.INCLUDE_CENTER);
     }
 
     words = WordResult.removeDuplicateValues(words);
@@ -291,7 +292,11 @@ export function useBoard() {
     const yArr: any[] = [];
 
     // we need actual coordinates to easily do the needed operations
-    newBoardLetters.forEach((_, tileId) => {
+    newBoardLetters.forEach((letterObj, tileId) => {
+
+      if (letterObj.char === '') {
+        throw new Error(BOARD_ERROR.NO_BLANK);
+      }
 
       const x = getXindexFromTileId(tileId);
       const y = getYindexFromTileId(tileId);
@@ -466,6 +471,11 @@ export function useRack(
     new Map([[0, undefined], [1, undefined], [2, undefined], [3, undefined], [4, undefined], [5, undefined], [6, undefined]])
   );
 
+  // when letters are returned to the rack, their blankness is restored
+  const makeBlank = (letter: LetterObj) => {
+    return new LetterObj(letter.id, '', letter.value, true);
+  };
+
   const addLettersToRack = (letters: LetterObj[]) => {
 
     const newRack = new Map<number, LetterObj | undefined>(rack);
@@ -479,7 +489,10 @@ export function useRack(
 
         if (letterToAdd) {
           // set isClickable to true on the immutable LetterObjs
-          const clickableLetter = new LetterObj(letterToAdd.id, letterToAdd.char, letterToAdd.value, true);
+          let clickableLetter = new LetterObj(letterToAdd.id, letterToAdd.char, letterToAdd.value, true);
+          if (clickableLetter.value === 0) {
+            clickableLetter = makeBlank(clickableLetter);
+          }
           newRack.set(slotId, clickableLetter);
         }
       }
@@ -496,6 +509,9 @@ export function useRack(
   };
 
   const addRackLetterAt = (slotId: number, letterObj: LetterObj) => {
+    if (letterObj.value === 0) {
+      letterObj = makeBlank(letterObj);
+    }
 
     const rackCopy = new Map<number, LetterObj | undefined>(rack);
 

@@ -8,9 +8,10 @@ type BoardProps = {
   letters: Map<number, LetterObj>;
   handleTileClick: Function;
   handleLetterClick: Function;
+  handleBlankLetterDropDown: Function;
 };
 
-export default function Board({ tiles, letters, handleTileClick, handleLetterClick }: BoardProps) {
+export default function Board({ tiles, letters, handleTileClick, handleLetterClick, handleBlankLetterDropDown }: BoardProps) {
 
   const columnLegendPath = '/alphabet.png';
   const rowLegendPath = '/numbers.png';
@@ -20,7 +21,8 @@ export default function Board({ tiles, letters, handleTileClick, handleLetterCli
   tiles.forEach((tile, id) => {
     if (letters.has(id)) {
       const letter = letters.get(id)!;
-      boardToRender.push(<Letter key={letter.id} letterObj={letter} handleClick={() => handleLetterClick(id)} />);
+      boardToRender.push(<Letter key={letter.id} letterObj={letter} handleClick={() => handleLetterClick(id)}
+        onBoard={true} handleDropDown={(selectedOption: string) => handleBlankLetterDropDown(id, selectedOption)} />);
     } else {
       boardToRender.push(<Tile key={id} tileObj={tile} handleClick={handleTileClick} />);
     }

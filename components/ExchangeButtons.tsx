@@ -19,11 +19,13 @@ export default function ExchangeButtons({
 
   const exchangeBtnOrEmpty = canActivate ? <UIButton text="Exchange Letters" handleClick={handleActivateClick} /> : <div></div>;
 
+  const exchangeBtnText = canExchange ? 'Exhange Selected' : 'Select Letters';
+
   return (
     <div className="relative flex flex-col">
       {letterExchangeMode
         ? <div className="flex flex-col w-fit gap-2 bg-">
-          <UIButton text="Exchange Selected" color={exchangeBtnColor} handleClick={handleExchangeClick} enabled={canExchange} />
+          <UIButton text={exchangeBtnText} color={exchangeBtnColor} handleClick={handleExchangeClick} enabled={canExchange} />
           <UIButton text="Cancel" color={cancelBtnColor} handleClick={handleCancelClick} />
         </div>
         : exchangeBtnOrEmpty}

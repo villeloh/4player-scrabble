@@ -23,6 +23,9 @@ const GamePage: NextPage = () => {
   };
 
   const handleBoardLetterClick = (tileId: number) => {
+    // disable dropping a blank letter on another one
+    // (the logic gets too convoluted)
+    if (pickedUpLetter?.char === '') return;
 
     if (!pickedUpLetter) {
       setPickedUpLetter(takeLetterFromBoard(tileId));
@@ -31,6 +34,15 @@ const GamePage: NextPage = () => {
       addLetterOnBoard(tileId, pickedUpLetter);
       setPickedUpLetter(letter);
     }
+  };
+
+  // TODO: prop drilling obfuscates the logic here
+  // TODO: possibly move this logic to the (already bloated) useBoard() hook
+  const handleBlankLetterCharSelect = (tileId: number, selectedChar: string) => {
+
+    const blankLetter = boardLetters.get(tileId)!;
+    const newLetter = new LetterObj(blankLetter?.id, selectedChar, 0, true);
+    addLetterOnBoard(tileId, newLetter); // replaces the old one
   };
 
   const handleRackSlotClick = (slotId: number, letter: LetterObj | undefined) => {
@@ -127,7 +139,7 @@ const GamePage: NextPage = () => {
           <UIButton text='Play Word(s)' handleClick={handlePlayWordsClick} />
         </div>
         <div>
-          <Board letters={boardLetters} tiles={tiles} handleTileClick={handleEmptyTileClick} handleLetterClick={handleBoardLetterClick} />
+          <Board letters={boardLetters} tiles={tiles} handleTileClick={handleEmptyTileClick} handleLetterClick={handleBoardLetterClick} handleBlankLetterDropDown={handleBlankLetterCharSelect} />
           <Rack handleSlotClick={handleRackSlotClick} letterExchangeMode={letterExchangeMode} >
             {rack}
           </Rack>
