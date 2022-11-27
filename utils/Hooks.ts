@@ -278,7 +278,7 @@ export function useBoard() {
     }); // end forEach
 
     if (isFirstPlay && !centerTileIncluded) {
-      throw new Error(BOARD_ERROR.INCLUDE_CENTER);
+      // throw new Error(BOARD_ERROR.INCLUDE_CENTER);
     }
 
     words = WordResult.removeDuplicateValues(words);
@@ -327,7 +327,7 @@ export function useBoard() {
       }
 
       if (rightNeighborXvalue - xValue > 1) {
-        const inbetweenTileCoords = range(rightNeighborXvalue - xValue + 1, xValue + 1).map(xCoord => {
+        const inbetweenTileCoords = range(rightNeighborXvalue - (xValue + 1), xValue + 1).map(xCoord => {
           return { x: xCoord, y: +xArr[i].y };
         });
         const inbetweenTileIds = inbetweenTileCoords.map(coords => {
@@ -353,7 +353,7 @@ export function useBoard() {
       }
 
       if (downNeighborYvalue - yValue > 1) {
-        const inbetweenTileCoords = range(downNeighborYvalue - yValue + 1, yValue + 1).map(yCoord => {
+        const inbetweenTileCoords = range(downNeighborYvalue - (yValue + 1), yValue + 1).map(yCoord => {
           return { y: yCoord, x: +yArr[i].x };
         });
         const inbetweenTileIds = inbetweenTileCoords.map(coords => {
@@ -405,7 +405,7 @@ export function useBoard() {
   };
 
   return {
-    tiles, boardLetters, addLetterOnBoard, takeLetterFromBoard,
+    tiles, boardLetters, lettersOnBoard: newBoardLetters.size > 0, addLetterOnBoard, takeLetterFromBoard,
     lockBoardLetters, reRackBoardLetters, getUnverifiedWordsAndPoints
   };
 };
@@ -498,7 +498,7 @@ export function useRack(
         if (letterToAdd) {
           // set isClickable to true on the immutable LetterObjs
           let clickableLetter = new LetterObj(letterToAdd.id, letterToAdd.char, letterToAdd.value, true);
-          if (clickableLetter.value === 0) {
+          if (clickableLetter.value === 0 && !clickableLetter.isCharLocked) {
             clickableLetter = makeBlank(clickableLetter);
           }
           newRack.set(slotId, clickableLetter);
@@ -517,7 +517,7 @@ export function useRack(
   };
 
   const addRackLetterAt = (slotId: number, letterObj: LetterObj) => {
-    if (letterObj.value === 0) {
+    if (letterObj.value === 0 && !letterObj.isCharLocked) {
       letterObj = makeBlank(letterObj);
     }
 
@@ -581,6 +581,8 @@ const getYindexFromTileId = (id: number) => {
 };
 
 const getTileIdFromCoords = (coords: { x: number, y: number }) => {
+  // console.log('x: ', coords.x);
+  // console.log('y: ', coords.y);
   return coords.x + coords.y * 15;
 };
 

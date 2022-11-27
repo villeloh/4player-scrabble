@@ -94,8 +94,14 @@ const GamePage: NextPage = () => {
       const { words, points } = getUnverifiedWordsAndPoints();
       console.log(words);
       console.log('points: ', points);
+
       // TODO: send request to verification API
-      // TODO: lock board letters upon verif. success
+      // TODO: lock board letters only upon verif. success
+      lockBoardLetters();
+
+      // TODO: rerack letters and pass turn on verif. failure
+      // TODO: rerack blank letters with their selected value upon verif. failure
+      // (set letter.isCharLocked = true for this)
 
     } catch (error) {
       const err = error as Error;
@@ -105,7 +111,7 @@ const GamePage: NextPage = () => {
   };
 
   // TODO: getting a little messy here... Not sure of the best solution
-  const { tiles, boardLetters, takeLetterFromBoard, addLetterOnBoard, reRackBoardLetters, getUnverifiedWordsAndPoints } = useBoard();
+  const { tiles, boardLetters, lettersOnBoard, takeLetterFromBoard, addLetterOnBoard, lockBoardLetters, reRackBoardLetters, getUnverifiedWordsAndPoints } = useBoard();
   const { letterPouch, takeLettersFromPouch, exchangeLettersThroughPouch } = useLetterPouch();
   const { rack, removeRackLetterFrom, addRackLetterAt, refillRack, addLettersToRack, exchangeRackLetters } = useRack(letterPouch, takeLettersFromPouch, exchangeLettersThroughPouch);
 
@@ -136,7 +142,7 @@ const GamePage: NextPage = () => {
             handleExchangeClick={handleLetterExchangeClick}
             lettersSelected={lettersToExchange.length > 0}
           />
-          <UIButton text='Play Word(s)' handleClick={handlePlayWordsClick} />
+          <UIButton text='Play Word(s)' handleClick={handlePlayWordsClick} enabled={lettersOnBoard} />
         </div>
         <div>
           <Board letters={boardLetters} tiles={tiles} handleTileClick={handleEmptyTileClick} handleLetterClick={handleBoardLetterClick} handleBlankLetterDropDown={handleBlankLetterCharSelect} />
