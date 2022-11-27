@@ -32,7 +32,7 @@ export default function Letter({ letterObj, handleClick, handleDropDown, letterE
     if (!handleDropDown) return; // should not be possible
 
     handleDropDown(selectedOption?.value || 'A');
-    setIsBlank(false);
+    setIsBlank(false); // auto-closes the dropdown
   };
 
   // TODO: the click method is getting too convoluted due to prop drilling

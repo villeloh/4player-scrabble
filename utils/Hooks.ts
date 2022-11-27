@@ -97,7 +97,15 @@ export function useBoard() {
 
   const lockBoardLetters = () => {
 
-    setOldBoardLetters(new Map([...oldBoardLetters, ...newBoardLetters]));
+    // set isClickable to false for the immutable objects
+    const lockedBoardLetters = [...oldBoardLetters, ...newBoardLetters].map(idAndLetter => {
+      const tileId = idAndLetter[0];
+      const letter = idAndLetter[1];
+      const newItem: [number, LetterObj] = [tileId, new LetterObj(letter.id, letter.char, letter.value, false)];
+      return newItem;
+    });
+
+    setOldBoardLetters(new Map(lockedBoardLetters));
     setNewBoardLetters(new Map());
   };
 
