@@ -232,11 +232,6 @@ export function useBoard() {
   // TODO: tidy this up somehow
   const getUnverifiedWordsAndPoints = () => {
 
-    // TODO: blank letters need to be returned to the rack upon API verif. failure 
-    // (with their selected char locked in)
-
-    // TODO: lock board letters upon successful word API call; otherwise, return letters to rack
-
     try {
       validateNewLetterPlacement();
     } catch (error) {
@@ -565,6 +560,18 @@ export function useRack(
     refillRack,
     exchangeRackLetters
   };
+};
+
+export function useTimer(durationMS: number, callback: Function) {
+
+  const startTimer = () => {
+
+    setTimeout(() => {
+
+      callback();
+    }, durationMS);
+  };
+  return startTimer;
 };
 
 // ==================== HELPERS =======================================================

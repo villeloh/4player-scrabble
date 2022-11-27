@@ -4,11 +4,12 @@ import { useState, useEffect } from 'react';
 import Board from 'components/Board';
 import Rack from 'components/Rack';
 import Letter from 'components/Letter';
-import { useMouseMove, useLetterPouch, useBoard, useRack } from 'utils/hooks';
+import { useMouseMove, useLetterPouch, useBoard, useRack, useTimer } from 'utils/hooks';
 import Cursor from 'components/Cursor';
 import LetterObj from 'model/LetterObj';
 import UIButton from 'components/UIButton';
 import PouchControls from 'components/PouchControls';
+import Modal from 'components/Modal';
 
 const GamePage: NextPage = () => {
 
@@ -90,14 +91,22 @@ const GamePage: NextPage = () => {
   const handlePlayWordsClick = () => {
     if (pickedUpLetter) return;
 
+    let msgToDisplay: string | undefined;
+    let isError = false;
+
     try {
       const { words, points } = getUnverifiedWordsAndPoints();
       console.log(words);
       console.log('points: ', points);
 
       // TODO: send request to verification API
-      // TODO: lock board letters only upon verif. success
+      // TODO: lock board letters only upon API verif. success
       lockBoardLetters();
+
+      msgToDisplay = `Played words: ${words.join(', ')} ! Points: +${points} !`;
+      // TODO: draw new letters from pouch and pass turn on verif. success
+      // TODO: increase player's score
+      // TODO: check for victory
 
       // TODO: rerack letters and pass turn on verif. failure
       // TODO: rerack blank letters with their selected value upon verif. failure
@@ -107,8 +116,24 @@ const GamePage: NextPage = () => {
       const err = error as Error;
       console.log(err.message);
       reRackBoardLetters(addLettersToRack);
+
+      msgToDisplay = err.message;
+      isError = true;
+    }
+    if (msgToDisplay) {
+      displayModal(msgToDisplay, 3000, isError);
     }
   };
+
+  const displayModal = (text: string, durationMS: number, isError: boolean = false) => {
+
+    setModalData({ text, isError });
+    setModalVisible(true);
+    useTimer(durationMS, () => { setModalVisible(false); console.log(modalVisible); })();
+  };
+
+  const [modalData, setModalData] = useState({ text: '', isError: false });
+  const [modalVisible, setModalVisible] = useState(false);
 
   // TODO: getting a little messy here... Not sure of the best solution
   const { tiles, boardLetters, lettersOnBoard, takeLetterFromBoard, addLetterOnBoard, lockBoardLetters, reRackBoardLetters, getUnverifiedWordsAndPoints } = useBoard();
@@ -154,6 +179,7 @@ const GamePage: NextPage = () => {
       <Cursor mouseX={mouseX} mouseY={mouseY}>
         {pickedUpLetter && <Letter letterObj={pickedUpLetter} letterExchangeMode={letterExchangeMode} />}
       </Cursor>
+      {modalVisible && <Modal {...modalData} />}
     </div>
   );
 };
