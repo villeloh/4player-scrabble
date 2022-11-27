@@ -38,7 +38,7 @@ export function useBoard() {
   // that's on top of the current tile)
   const VERTICAL_JUMP = 15;
 
-  const [tiles] = useState(initTiles()); // I guess it could be a regular JS object now that it's static?
+  const tiles = initTiles(); // it's never changed so there's no need for useState()
   const [oldBoardLetters, setOldBoardLetters] = useState(new Map<number, LetterObj>());
   const [newBoardLetters, setNewBoardLetters] = useState(new Map<number, LetterObj>());
   const [boardLetters, setBoardLetters] = useState(new Map([...oldBoardLetters, ...newBoardLetters]));
@@ -109,7 +109,7 @@ export function useBoard() {
     setNewBoardLetters(new Map());
   };
 
-  const leftmostLetteredTilesId = (searchId: number) => {
+  const _leftmostLetteredTilesId = (searchId: number) => {
 
     let leftmostId = searchId;
 
@@ -125,7 +125,7 @@ export function useBoard() {
     return leftmostId; // id of leftmost tile that still had a letter on it
   };
 
-  const topmostLetteredTilesId = (searchId: number) => {
+  const _topmostLetteredTilesId = (searchId: number) => {
 
     let topmostId = searchId;
 
@@ -141,7 +141,7 @@ export function useBoard() {
     return topmostId; // id of topmost tile that still had a letter on it
   };
 
-  const getHorizontalWord = (startTileId: number) => {
+  const _getHorizontalWord = (startTileId: number) => {
 
     const allLetters = new Map([...oldBoardLetters, ...newBoardLetters]);
 
@@ -150,7 +150,7 @@ export function useBoard() {
 
     let charPoints = 0;
 
-    let searchId = leftmostLetteredTilesId(startTileId);
+    let searchId = _leftmostLetteredTilesId(startTileId);
 
     let letter = allLetters.get(searchId);
     let word = '';
@@ -185,7 +185,7 @@ export function useBoard() {
     return new WordResult(word, wordPoints);
   };
 
-  const getVerticalWord = (startTileId: number) => {
+  const _getVerticalWord = (startTileId: number) => {
 
     const allLetters = new Map([...oldBoardLetters, ...newBoardLetters]);
 
@@ -194,7 +194,7 @@ export function useBoard() {
 
     let charPoints = 0;
 
-    let searchId = topmostLetteredTilesId(startTileId);
+    let searchId = _topmostLetteredTilesId(startTileId);
 
     let letter = allLetters.get(searchId);
     let word = '';
@@ -233,7 +233,7 @@ export function useBoard() {
   const getUnverifiedWordsAndPoints = () => {
 
     try {
-      validateNewLetterPlacement();
+      _validateNewLetterPlacement();
     } catch (error) {
       const err = error as Error;
       throw err;
@@ -254,8 +254,8 @@ export function useBoard() {
       }
 
       // a lot of duplicate operations, but who cares, the array is very small
-      const horizontal = getHorizontalWord(id);
-      const vertical = getVerticalWord(id);
+      const horizontal = _getHorizontalWord(id);
+      const vertical = _getVerticalWord(id);
 
       const horizLengthOk = horizontal.word.length > 1;
       const vertLengthOk = vertical.word.length > 1;
@@ -288,7 +288,7 @@ export function useBoard() {
 
   // validate regarding gaps, adjacency to old board letters, and angle containment
   // TODO: combine the monster for-loops somehow
-  const validateNewLetterPlacement = () => {
+  const _validateNewLetterPlacement = () => {
 
     const xArr: any[] = [];
     const yArr: any[] = [];
@@ -300,8 +300,8 @@ export function useBoard() {
         throw new Error(BOARD_ERROR.NO_BLANK);
       }
 
-      const x = getXindexFromTileId(tileId);
-      const y = getYindexFromTileId(tileId);
+      const x = _getXindexFromTileId(tileId);
+      const y = _getYindexFromTileId(tileId);
       xArr.push({ x, y });
       yArr.push({ y, x });
     });
@@ -321,11 +321,11 @@ export function useBoard() {
       }
 
       if (rightNeighborXvalue - xValue > 1) {
-        const inbetweenTileCoords = range(rightNeighborXvalue - (xValue + 1), xValue + 1).map(xCoord => {
+        const inbetweenTileCoords = _range(rightNeighborXvalue - (xValue + 1), xValue + 1).map(xCoord => {
           return { x: xCoord, y: +xArr[i].y };
         });
         const inbetweenTileIds = inbetweenTileCoords.map(coords => {
-          return getTileIdFromCoords(coords);
+          return _getTileIdFromCoords(coords);
         });
         inbetweenTileIds.forEach(id => {
 
@@ -347,11 +347,11 @@ export function useBoard() {
       }
 
       if (downNeighborYvalue - yValue > 1) {
-        const inbetweenTileCoords = range(downNeighborYvalue - (yValue + 1), yValue + 1).map(yCoord => {
+        const inbetweenTileCoords = _range(downNeighborYvalue - (yValue + 1), yValue + 1).map(yCoord => {
           return { y: yCoord, x: +yArr[i].x };
         });
         const inbetweenTileIds = inbetweenTileCoords.map(coords => {
-          return getTileIdFromCoords(coords);
+          return _getTileIdFromCoords(coords);
         });
         inbetweenTileIds.forEach(id => {
 
@@ -577,20 +577,20 @@ export function useTimer(durationMS: number, callback: Function) {
 // ==================== HELPERS =======================================================
 
 // a bad consequence of storing the tileIds as a Map is the lack of a 'real' index
-const getXindexFromTileId = (id: number) => {
+const _getXindexFromTileId = (id: number) => {
   const rowNumber = Math.floor(id / 15);
   return id - rowNumber * 15;
 };
 
-const getYindexFromTileId = (id: number) => {
+const _getYindexFromTileId = (id: number) => {
   return Math.floor(id / 15);
 };
 
-const getTileIdFromCoords = (coords: { x: number, y: number }) => {
+const _getTileIdFromCoords = (coords: { x: number, y: number }) => {
   return coords.x + coords.y * 15;
 };
 
 // range of numbers; e.g. range(3, 2) => [2,3,4]
-const range = (size: number, startAt = 0) => {
+const _range = (size: number, startAt = 0) => {
   return [...Array(size).keys()].map(i => i + startAt);
 };

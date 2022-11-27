@@ -15,6 +15,28 @@ const GamePage: NextPage = () => {
 
   const pageTitle = '4-P Scrabble';
 
+  // TODO: getting a little messy here... Not sure of the best solution
+  const { tiles, boardLetters, lettersOnBoard, takeLetterFromBoard, addLetterOnBoard,
+    lockBoardLetters, reRackBoardLetters, getUnverifiedWordsAndPoints } = useBoard();
+  const { letterPouch, takeLettersFromPouch, exchangeLettersThroughPouch } = useLetterPouch();
+  const { rack, removeRackLetterFrom, addRackLetterAt, refillRack, addLettersToRack,
+    exchangeRackLetters } = useRack(letterPouch, takeLettersFromPouch, exchangeLettersThroughPouch);
+
+  // TODO(?): could be made into their own hooks
+  const [pickedUpLetter, setPickedUpLetter] = useState<LetterObj>();
+  const [letterExchangeMode, setLetterExchangeMode] = useState(false);
+  const [lettersToExchange, setLettersToExchange] = useState<LetterObj[]>([]);
+  const [modalData, setModalData] = useState({ text: '', isError: false });
+  const [modalVisible, setModalVisible] = useState(false);
+
+  const { mouseX, mouseY, handleMouseMove } = useMouseMove();
+
+  // TODO: browser refresh resets the letters; fix it (with LocalStorage?)
+  useEffect(() => {
+    // infinite rerender loop if we don't call this initially in useEffect()
+    refillRack();
+  }, []);
+
   const handleEmptyTileClick = (tileId: number) => {
 
     if (pickedUpLetter) {
@@ -129,28 +151,8 @@ const GamePage: NextPage = () => {
 
     setModalData({ text, isError });
     setModalVisible(true);
-    useTimer(durationMS, () => { setModalVisible(false); console.log(modalVisible); })();
+    useTimer(durationMS, () => { setModalVisible(false); })();
   };
-
-  const [modalData, setModalData] = useState({ text: '', isError: false });
-  const [modalVisible, setModalVisible] = useState(false);
-
-  // TODO: getting a little messy here... Not sure of the best solution
-  const { tiles, boardLetters, lettersOnBoard, takeLetterFromBoard, addLetterOnBoard, lockBoardLetters, reRackBoardLetters, getUnverifiedWordsAndPoints } = useBoard();
-  const { letterPouch, takeLettersFromPouch, exchangeLettersThroughPouch } = useLetterPouch();
-  const { rack, removeRackLetterFrom, addRackLetterAt, refillRack, addLettersToRack, exchangeRackLetters } = useRack(letterPouch, takeLettersFromPouch, exchangeLettersThroughPouch);
-
-  const [pickedUpLetter, setPickedUpLetter] = useState<LetterObj>();
-  const [letterExchangeMode, setLetterExchangeMode] = useState(false);
-  const [lettersToExchange, setLettersToExchange] = useState<LetterObj[]>([]);
-
-  const { mouseX, mouseY, handleMouseMove } = useMouseMove();
-
-  // TODO: browser refresh resets the letters; fix it with LocalStorage
-  useEffect(() => {
-    // infinite rerender loop if we don't call this initially in useEffect()
-    refillRack();
-  }, []);
 
   // TODO: prop drilling is getting out of control (PouchControls has 3 levels)
   return (
@@ -160,6 +162,12 @@ const GamePage: NextPage = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <div className='flex flex-row justify-center'>
+        <div>
+          <Board letters={boardLetters} tiles={tiles} handleTileClick={handleEmptyTileClick} handleLetterClick={handleBoardLetterClick} handleBlankLetterDropDown={handleBlankLetterCharSelect} />
+          <Rack handleSlotClick={handleRackSlotClick} letterExchangeMode={letterExchangeMode} >
+            {rack}
+          </Rack>
+        </div>
         <div className='mt-16 flex flex-col gap-7'>
           <PouchControls letterPouch={letterPouch} letterExchangeMode={letterExchangeMode}
             handleActivateClick={handleActivateLetterExchangeModeClick}
@@ -167,13 +175,7 @@ const GamePage: NextPage = () => {
             handleExchangeClick={handleLetterExchangeClick}
             lettersSelected={lettersToExchange.length > 0}
           />
-          <UIButton text='Play Word(s)' handleClick={handlePlayWordsClick} enabled={lettersOnBoard} />
-        </div>
-        <div>
-          <Board letters={boardLetters} tiles={tiles} handleTileClick={handleEmptyTileClick} handleLetterClick={handleBoardLetterClick} handleBlankLetterDropDown={handleBlankLetterCharSelect} />
-          <Rack handleSlotClick={handleRackSlotClick} letterExchangeMode={letterExchangeMode} >
-            {rack}
-          </Rack>
+          <UIButton text='Play Word(s)' handleClick={handlePlayWordsClick} enabled={lettersOnBoard} color={'bg-green-400'} />
         </div>
       </div>
       <Cursor mouseX={mouseX} mouseY={mouseY}>
