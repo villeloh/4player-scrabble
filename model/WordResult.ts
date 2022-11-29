@@ -30,15 +30,11 @@ export default class WordResult {
   // needed because JS Sets store objects by *reference*, not by value
   static removeDuplicateValues(set: Set<WordResult>): Set<WordResult> {
 
-    const arr = [...set].map(wordResult => {
-      return wordResult.toString();
-    });
+    const arr = [...set].map(wordResult => wordResult.toString());
 
     // remove duplicates with value comparison
     const uniqueStrSet = new Set(arr);
 
-    return new Set([...uniqueStrSet].map(str => {
-      return WordResult.fromString(str);
-    }));
+    return new Set([...uniqueStrSet].map(str => WordResult.fromString(str)));
   };
 };

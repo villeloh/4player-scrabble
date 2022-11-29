@@ -1,4 +1,4 @@
-import PlayerObj from "model/PlayerObj";
+import PlayerObj from "model/Player";
 
 export default class PlayerOrder {
 
@@ -27,6 +27,7 @@ export default class PlayerOrder {
     return this._ids[this._index++];
   }
 
+  // TODO: probably the index needs some adjustment as well
   removePlayerId(idOfPlayerToRemove: number) {
     this._ids = this._ids.filter(id => { return id !== idOfPlayerToRemove });
   }

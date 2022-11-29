@@ -1,9 +1,8 @@
 import PlayerOrder from "model/PlayerOrder";
-import PlayerObj from "./PlayerObj";
+import Player from "./Player";
 
 enum GameState {
   WAIT_FOR_PLAYERS,
-  WAIT_FOR_CREATOR_OK,
   IN_PROGRESS,
   ENDED
 }
@@ -14,13 +13,13 @@ export default class Game {
   static readonly MIN_PLAYERS = 2;
   static readonly MAX_PLAYERS = 4;
 
-  private _players: PlayerObj[] = [];
+  private _players: Player[] = [];
   private _playerOrder?: PlayerOrder;
-  private _activePlayer?: PlayerObj;
+  private _activePlayer?: Player;
 
   private _gameState: GameState = GameState.WAIT_FOR_PLAYERS;
 
-  constructor(creator: PlayerObj) {
+  constructor(creator: Player) {
 
     this.addPlayer(creator);
   }
@@ -50,14 +49,15 @@ export default class Game {
   end() {
 
     this._gameState = GameState.ENDED;
+    this._activePlayer?.endTurn();
     this._activePlayer = undefined;
   }
 
-  get players(): PlayerObj[] {
+  get players(): Player[] {
     return this._players;
   }
 
-  addPlayer(player: PlayerObj) {
+  addPlayer(player: Player) {
 
     if (this._players.length === Game.MAX_PLAYERS) return;
 
@@ -72,11 +72,11 @@ export default class Game {
     return this._players.length;
   }
 
-  get activePlayer(): PlayerObj | undefined {
+  get activePlayer(): Player | undefined {
     return this._activePlayer;
   }
 
-  set activePlayer(player: PlayerObj | undefined) {
+  set activePlayer(player: Player | undefined) {
     this._activePlayer = player;
   }
 

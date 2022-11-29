@@ -22,7 +22,7 @@ export default function Board({ tiles, letters, handleTileClick, handleLetterCli
     if (letters.has(id)) {
       const letter = letters.get(id)!;
       boardToRender.push(<Letter key={letter.id} letterObj={letter} handleClick={() => handleLetterClick(id)}
-        onBoard={true} handleDropDown={(selectedOption: string) => handleBlankLetterDropDown(id, selectedOption)} />);
+        isOnBoard={true} handleDropDown={(selectedOption: string) => handleBlankLetterDropDown(id, selectedOption)} />);
     } else {
       boardToRender.push(<Tile key={id} tileObj={tile} handleClick={handleTileClick} />);
     }

@@ -15,6 +15,7 @@ imgUrlMap.set('CENTER', '/center_star.jpg');
 
 export default function Tile({ tileObj, handleClick }: TileProps) {
 
+  // TODO: make these responsive...
   const tileImgWidth = '46px';
   const tileImgHeight = '50px';
 

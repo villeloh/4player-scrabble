@@ -15,6 +15,7 @@ export default function Rack({ children, handleSlotClick, letterExchangeMode }: 
     rackSlots.push(<RackSlot key={slotId} slotId={slotId} letterObj={letterObj} handleClick={handleSlotClick} letterExchangeMode={letterExchangeMode} />);
   });
 
+  // TODO: rack color should match player color
   return (
     <div className="flex flex-row items-center justify-center mt-2">
       <div className="bg-sky-800 w-fit h-fit items-center justify-center rounded-md">

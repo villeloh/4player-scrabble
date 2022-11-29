@@ -7,12 +7,12 @@ type LetterProps = {
   handleClick?: Function;
   handleDropDown?: Function;
   letterExchangeMode?: boolean;
-  onBoard?: boolean;
+  isOnBoard?: boolean;
 };
 
 const dropDownOptions: { value: string, label: string }[] = [{ value: 'A', label: 'A' }, { value: 'B', label: 'B' }, { value: 'C', label: 'C' }, { value: 'D', label: 'D' }, { value: 'E', label: 'E' }, { value: 'F', label: 'F' }, { value: 'G', label: 'G' }, { value: 'H', label: 'H' }, { value: 'I', label: 'I' }, { value: 'J', label: 'J' }, { value: 'K', label: 'K' }, { value: 'L', label: 'L' }, { value: 'M', label: 'M' }, { value: 'N', label: 'N' }, { value: 'O', label: 'O' }, { value: 'P', label: 'P' }, { value: 'Q', label: 'Q' }, { value: 'R', label: 'R' }, { value: 'S', label: 'S' }, { value: 'T', label: 'T' }, { value: 'U', label: 'U' }, { value: 'V', label: 'V' }, { value: 'W', label: 'W' }, { value: 'X', label: 'X' }, { value: 'Y', label: 'Y' }, { value: 'Z', label: 'Z' }];
 
-export default function Letter({ letterObj, handleClick, handleDropDown, letterExchangeMode = false, onBoard = false }: LetterProps) {
+export default function Letter({ letterObj, handleClick, handleDropDown, letterExchangeMode = false, isOnBoard = false }: LetterProps) {
 
   const [selectedForEx, setSelectedForEx] = useState(false);
   useEffect(() => {
@@ -50,7 +50,7 @@ export default function Letter({ letterObj, handleClick, handleDropDown, letterE
 
   return (
     <div className={`bg-[#d0bf7d] mt-[2px] ml-[2px] w-[41px] h-[45px] relative rounded-lg shadow-2xl flex items-center justify-center ${selectedStyles}`} onClick={() => handleClickAndExchangeMode()}>
-      {isBlank && onBoard
+      {isBlank && isOnBoard
         ? dropDown
         : <div>
           <h1 className="absolute top-[15px] left-1/3 w-fit h-fit leading-3 text-lg cursor-default select-none">{letterObj.char}</h1>

@@ -1,5 +1,5 @@
 import LetterObj from 'model/LetterObj';
-import { PLAYER_COLOR } from 'model/PlayerObj';
+import { PLAYER_COLOR } from 'model/Player';
 import type { NextApiRequest, NextApiResponse } from 'next'
 
 // think about this some more. should most of the state exist directly on the server ??
