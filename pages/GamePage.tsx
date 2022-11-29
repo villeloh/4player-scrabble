@@ -16,11 +16,11 @@ const GamePage: NextPage = () => {
   const pageTitle = '4-P Scrabble';
 
   // TODO: getting a little messy here... Not sure of the best solution
-  const { tiles, boardLetters, lettersOnBoard, takeLetterFromBoard, addLetterOnBoard,
-    lockBoardLetters, reRackBoardLetters, getUnverifiedWordsAndPoints } = useBoard();
   const { letterPouch, takeLettersFromPouch, exchangeLettersThroughPouch } = useLetterPouch();
   const { rack, removeRackLetterFrom, addRackLetterAt, refillRack, addLettersToRack,
     exchangeRackLetters } = useRack(letterPouch, takeLettersFromPouch, exchangeLettersThroughPouch);
+  const { tiles, boardLetters, newLettersOnBoard, takeLetterFromBoard, addLetterOnBoard,
+    lockBoardLetters, reRackBoardLetters, getRuleVerifiedWordsAndPoints } = useBoard(addLettersToRack);
 
   // TODO(?): could be made into their own hooks
   const [pickedUpLetter, setPickedUpLetter] = useState<LetterObj>();
@@ -92,7 +92,7 @@ const GamePage: NextPage = () => {
     if (pickedUpLetter) return;
 
     setLetterExchangeMode(true);
-    reRackBoardLetters(addLettersToRack);
+    reRackBoardLetters();
   };
 
   const handleCancelLetterExchangeModeClick = () => {
@@ -117,7 +117,7 @@ const GamePage: NextPage = () => {
     let isError = false;
 
     try {
-      const { words, points } = getUnverifiedWordsAndPoints();
+      const { words, points } = getRuleVerifiedWordsAndPoints();
       console.log(words);
       console.log('points: ', points);
 
@@ -137,7 +137,7 @@ const GamePage: NextPage = () => {
     } catch (error) {
       const err = error as Error;
       console.log(err.message);
-      reRackBoardLetters(addLettersToRack);
+      reRackBoardLetters();
 
       msgToDisplay = err.message;
       isError = true;
@@ -175,7 +175,7 @@ const GamePage: NextPage = () => {
             handleExchangeClick={handleLetterExchangeClick}
             lettersSelected={lettersToExchange.length > 0}
           />
-          <UIButton text='Play Word(s)' handleClick={handlePlayWordsClick} enabled={lettersOnBoard} color={'bg-green-400'} />
+          <UIButton text='Play Word(s)' handleClick={handlePlayWordsClick} enabled={newLettersOnBoard} color={'bg-green-400'} />
         </div>
       </div>
       <Cursor mouseX={mouseX} mouseY={mouseY}>

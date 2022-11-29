@@ -22,7 +22,8 @@ export function useMouseMove() {
   };
 };
 
-export function useBoard() {
+// TODO: such a huge hook is far from ideal; think of a refactor
+export function useBoard(addLettersToRack: Function) {
 
   enum BOARD_ERROR {
     NO_BLANK = 'GAME RULE: Please select a character for all blank Letters!',
@@ -98,9 +99,7 @@ export function useBoard() {
   const lockBoardLetters = () => {
 
     // set isClickable to false for the immutable objects
-    const lockedBoardLetters = [...oldBoardLetters, ...newBoardLetters].map(idAndLetter => {
-      const tileId = idAndLetter[0];
-      const letter = idAndLetter[1];
+    const lockedBoardLetters = [...oldBoardLetters, ...newBoardLetters].map(([tileId, letter]) => {
       const newItem: [number, LetterObj] = [tileId, new LetterObj(letter.id, letter.char, letter.value, false)];
       return newItem;
     });
@@ -122,7 +121,7 @@ export function useBoard() {
       leftmostId = searchId;
       isLetterToTheLeft = allLetters.get(--searchId) !== undefined;
     }
-    return leftmostId; // id of leftmost tile that still had a letter on it
+    return leftmostId;
   };
 
   const _topmostLetteredTilesId = (searchId: number) => {
@@ -138,12 +137,10 @@ export function useBoard() {
       topmostId = searchId;
       isLetterUp = allLetters.get(searchId -= VERTICAL_JUMP) !== undefined;
     }
-    return topmostId; // id of topmost tile that still had a letter on it
+    return topmostId;
   };
 
   const _getHorizontalWord = (startTileId: number) => {
-
-    const allLetters = new Map([...oldBoardLetters, ...newBoardLetters]);
 
     let wordPoints = 0;
     let wordBonusMultiplier = 1;
@@ -152,7 +149,7 @@ export function useBoard() {
 
     let searchId = _leftmostLetteredTilesId(startTileId);
 
-    let letter = allLetters.get(searchId);
+    let letter = boardLetters.get(searchId);
     let word = '';
 
     while (letter) {
@@ -177,7 +174,7 @@ export function useBoard() {
       word += letter.char;
       wordPoints += charPoints;
 
-      letter = allLetters.get(++searchId);
+      letter = boardLetters.get(++searchId);
       charPoints = 0; // prepare for next char
     } // end while-loop
     wordPoints *= wordBonusMultiplier;
@@ -187,8 +184,6 @@ export function useBoard() {
 
   const _getVerticalWord = (startTileId: number) => {
 
-    const allLetters = new Map([...oldBoardLetters, ...newBoardLetters]);
-
     let wordPoints = 0;
     let wordBonusMultiplier = 1;
 
@@ -196,7 +191,7 @@ export function useBoard() {
 
     let searchId = _topmostLetteredTilesId(startTileId);
 
-    let letter = allLetters.get(searchId);
+    let letter = boardLetters.get(searchId);
     let word = '';
 
     while (letter) {
@@ -221,7 +216,7 @@ export function useBoard() {
       word += letter.char;
       wordPoints += charPoints;
 
-      letter = allLetters.get(searchId += VERTICAL_JUMP);
+      letter = boardLetters.get(searchId += VERTICAL_JUMP);
       charPoints = 0; // prepare for next char
     } // end while-loop
     wordPoints *= wordBonusMultiplier;
@@ -230,13 +225,13 @@ export function useBoard() {
   };
 
   // TODO: tidy this up somehow
-  const getUnverifiedWordsAndPoints = () => {
+  const getRuleVerifiedWordsAndPoints = () => {
 
     try {
+      // TODO: validation continues after this, so the name is not ideal
       _validateNewLetterPlacement();
     } catch (error) {
-      const err = error as Error;
-      throw err;
+      throw error as Error;
     }
 
     let checkForCenterTile = isFirstPlay;
@@ -275,6 +270,7 @@ export function useBoard() {
       throw new Error(BOARD_ERROR.INCLUDE_CENTER);
     }
 
+    // even though it is a Set, comparison by reference means there can be duplicates
     words = WordResult.removeDuplicateValues(words);
 
     let points = [...words].map(wordResult => wordResult.points).reduce((prev, curr) => prev + curr);
@@ -286,20 +282,20 @@ export function useBoard() {
     return { words: wordsToReturn, points };
   };
 
-  // validate regarding gaps, adjacency to old board letters, and angle containment
+  // validate regarding blankness, gaps, adjacency to old board letters, and angle containment
   // TODO: combine the monster for-loops somehow
   const _validateNewLetterPlacement = () => {
 
     const xArr: any[] = [];
     const yArr: any[] = [];
 
-    // we need actual coordinates to easily do the needed operations
     newBoardLetters.forEach((letterObj, tileId) => {
 
       if (letterObj.char === '') {
         throw new Error(BOARD_ERROR.NO_BLANK);
       }
 
+      // we need actual coordinates to easily do the needed operations
       const x = _getXindexFromTileId(tileId);
       const y = _getYindexFromTileId(tileId);
       xArr.push({ x, y });
@@ -371,36 +367,34 @@ export function useBoard() {
 
     if (!isFirstPlay) {
 
-      let atLeastOneNewLetterAdjacentToOld = false;
+      let hasAdjacentOldLetter = false;
 
-      newBoardLetters.forEach((_, tileId) => {
+      for (let [tileId, _] of newBoardLetters) {
 
         const leftOld = oldBoardLetters.get(tileId - 1) !== undefined;
         const rightOld = oldBoardLetters.get(tileId + 1) !== undefined;
         const topOld = oldBoardLetters.get(tileId - VERTICAL_JUMP) !== undefined;
         const downOld = oldBoardLetters.get(tileId + VERTICAL_JUMP) !== undefined;
 
-        if (!atLeastOneNewLetterAdjacentToOld) {
-
-          atLeastOneNewLetterAdjacentToOld = leftOld || rightOld || topOld || downOld;
-        }
-      });
-      if (!atLeastOneNewLetterAdjacentToOld) {
+        hasAdjacentOldLetter = leftOld || rightOld || topOld || downOld;
+        if (hasAdjacentOldLetter) break;
+      }
+      if (!hasAdjacentOldLetter) {
         throw new Error(BOARD_ERROR.TOUCH_OLD_WORD);
       }
-    }
+    } // end if
   };
 
   // could be part of useRack as well; matter of taste
-  const reRackBoardLetters = (addLettersToRack: Function) => {
-
+  const reRackBoardLetters = () => {
     const letters = takeLettersFromBoard([...newBoardLetters.keys()]);
-    addLettersToRack(letters);
+    addLettersToRack(letters); // given in the hook 'constructor'
   };
 
+  // TODO: newLettersOnBoard existing is not ideal
   return {
-    tiles, boardLetters, lettersOnBoard: newBoardLetters.size > 0, addLetterOnBoard, takeLetterFromBoard,
-    lockBoardLetters, reRackBoardLetters, getUnverifiedWordsAndPoints
+    tiles, boardLetters, newLettersOnBoard: newBoardLetters.size > 0, addLetterOnBoard,
+    takeLetterFromBoard, lockBoardLetters, reRackBoardLetters, getRuleVerifiedWordsAndPoints
   };
 };
 
@@ -414,14 +408,13 @@ export function useLetterPouch() {
       amount = letterPouch.length;
     }
 
+    // ensure no duplicate indices
     const indices = new Set<number>();
 
-    // ensure no duplicate indices
     while (indices.size < amount) {
-
       indices.add(Math.floor(Math.random() * letterPouch.length));
     }
-    const letters = Array.from(indices).map(index => { return letterPouch[index]; });
+    const letters = [...indices].map(index => letterPouch[index]);
 
     // remove the chosen letters from the pouch
     setLetterPouch([...letterPouch.filter((_, index) => { return !indices.has(index); })]);
@@ -429,17 +422,17 @@ export function useLetterPouch() {
     return letters;
   };
 
-  // we need an atomic state update to avoid inconsistent state
+  // to avoid inconsistent state, we need an atomic state update for many letters
   const exchangeLettersThroughPouch = (oldLetters: LetterObj[]) => {
 
+    // ensure no duplicate indices
     const indices = new Set<number>();
 
-    // ensure no duplicate indices
     while (indices.size < oldLetters.length) {
 
       indices.add(Math.floor(Math.random() * letterPouch.length));
     }
-    const newLetters = Array.from(indices).map(index => { return letterPouch[index]; });
+    const newLetters = [...indices].map(index => letterPouch[index]);
 
     // remove the newly drawn letters from the pouch and add the old racked letters
     setLetterPouch([...letterPouch.filter((_, index) => { return !indices.has(index); }), ...oldLetters]);
@@ -447,6 +440,7 @@ export function useLetterPouch() {
     return newLetters;
   };
 
+  // TODO: remove this when it's sure the Pouch works correctly at all times
   useEffect(() => {
     console.log('Letters in Pouch: ', letterPouch.length);
   }, [letterPouch]);
@@ -465,7 +459,7 @@ export function useRack(
   takeLettersFromPouch: (amount: number) => LetterObj[],
   exchangeLettersThroughPouch: (letters: LetterObj[]) => LetterObj[]) {
 
-  // always have 7 letters (including undefined :p) so that the visual rack works properly
+  // always have 7 letters (including undefined ones :p) so that the visual rack works properly
   const RACK_CAPACITY = 7;
 
   // the ids are the indices of the rack 'slots'
@@ -473,11 +467,12 @@ export function useRack(
     new Map([[0, undefined], [1, undefined], [2, undefined], [3, undefined], [4, undefined], [5, undefined], [6, undefined]])
   );
 
-  // when letters are returned to the rack, their blankness is restored
-  const makeBlank = (letter: LetterObj) => {
+  // when formerly blank letters are returned to the rack, their blankness is restored
+  const _makeBlank = (letter: LetterObj) => {
     return new LetterObj(letter.id, '', letter.value, true);
   };
 
+  // staleness issue if we don't add multiple letters in a batch
   const addLettersToRack = (letters: LetterObj[]) => {
 
     const newRack = new Map<number, LetterObj | undefined>(rack);
@@ -493,7 +488,7 @@ export function useRack(
           // set isClickable to true on the immutable LetterObjs
           let clickableLetter = new LetterObj(letterToAdd.id, letterToAdd.char, letterToAdd.value, true);
           if (clickableLetter.value === 0 && !clickableLetter.isCharLocked) {
-            clickableLetter = makeBlank(clickableLetter);
+            clickableLetter = _makeBlank(clickableLetter);
           }
           newRack.set(slotId, clickableLetter);
         }
@@ -512,7 +507,7 @@ export function useRack(
 
   const addRackLetterAt = (slotId: number, letterObj: LetterObj) => {
     if (letterObj.value === 0 && !letterObj.isCharLocked) {
-      letterObj = makeBlank(letterObj);
+      letterObj = _makeBlank(letterObj);
     }
 
     const rackCopy = new Map<number, LetterObj | undefined>(rack);
@@ -524,9 +519,8 @@ export function useRack(
   const refillRack = () => {
 
     let numToDraw = 0;
-    rack.forEach((_, id) => {
-      const letter = rack.get(id);
-      if (letter === null || letter === undefined) {
+    rack.forEach((letter, _) => {
+      if (!letter) {
         numToDraw++;
       }
     });
@@ -536,6 +530,7 @@ export function useRack(
   const exchangeRackLetters = (lettersToExchange: LetterObj[]) => {
 
     // Game Rule: can only exchange letters if the pouch has > 7 left
+    // NOTE: this check occurs in the UI already, but it doesn't hurt to have it here
     if (letterPouch.length <= RACK_CAPACITY) return;
 
     const newLetters = exchangeLettersThroughPouch(lettersToExchange);
