@@ -274,12 +274,15 @@ export function useBoard(addLettersToRack: Function) {
     words = WordResult.removeDuplicateValues(words);
 
     let points = [...words].map(wordResult => wordResult.points).reduce((prev, curr) => prev + curr);
+
+    let hasBonus = false;
     if (newBoardLetters.size === 7) {
       points += 50; // using all 7 letters at once gives 50 bonus points
+      hasBonus = true;
     }
     const wordsToReturn = [...words].map(wordResult => wordResult.word);
 
-    return { words: wordsToReturn, points };
+    return { words: wordsToReturn, points, hasBonus };
   };
 
   // validate regarding blankness, gaps, adjacency to old board letters, and angle containment
@@ -557,14 +560,16 @@ export function useRack(
   };
 };
 
+// I'm not sure if this is totally correct, but it works for awaiting modals, so it's good enough
 export function useTimer(durationMS: number, callback: Function) {
 
   const startTimer = () => {
+    return new Promise(resolve => {
+      setTimeout(() => {
 
-    setTimeout(() => {
-
-      callback();
-    }, durationMS);
+        return resolve(callback());
+      }, durationMS);
+    });
   };
   return startTimer;
 };

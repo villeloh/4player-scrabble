@@ -10,10 +10,11 @@ import LetterObj from 'model/LetterObj';
 import UIButton from 'components/UIButton';
 import PouchControls from 'components/PouchControls';
 import Modal from 'components/Modal';
+import { APP_TITLE } from 'utils/globals';
 
 const GamePage: NextPage = () => {
 
-  const pageTitle = '4-P Scrabble';
+  const pageTitle = APP_TITLE;
 
   // TODO: getting a little messy here... Not sure of the best solution
   const { letterPouch, takeLettersFromPouch, exchangeLettersThroughPouch } = useLetterPouch();
@@ -116,10 +117,13 @@ const GamePage: NextPage = () => {
     let msgToDisplay: string | undefined;
     let isError = false;
 
+    let bonus = false;
     try {
-      const { words, points } = getRuleVerifiedWordsAndPoints();
+      const { words, points, hasBonus } = getRuleVerifiedWordsAndPoints();
       console.log(words);
       console.log('points: ', points);
+
+      bonus = hasBonus;
 
       // TODO: send request to verification API
       // TODO: lock board letters only upon API verif. success
@@ -143,15 +147,20 @@ const GamePage: NextPage = () => {
       isError = true;
     }
     if (msgToDisplay) {
-      displayModal(msgToDisplay, 3000, isError);
+      displayModal(msgToDisplay, 2500, isError).then(_ => {
+        if (bonus) {
+          const bonusMsg = 'BONUS: +50 points for using all 7 letters!';
+          displayModal(bonusMsg, 2000);
+        }
+      });
     }
   };
 
-  const displayModal = (text: string, durationMS: number, isError: boolean = false) => {
+  const displayModal = async (text: string, durationMS: number, isError: boolean = false) => {
 
     setModalData({ text, isError });
     setModalVisible(true);
-    useTimer(durationMS, () => { setModalVisible(false); })();
+    await useTimer(durationMS, () => { setModalVisible(false); })();
   };
 
   // TODO: prop drilling is getting out of control (PouchControls has 3 levels)
