@@ -14,6 +14,8 @@ export default class WordResult {
     return `WordResult: word ${this.word}, points ${this.points}`;
   }
 
+  // Should be unnecessary if the new ValueSet works; delete eventually
+  /*
   // NOTE: breaks if the toString() method is altered!
   private static fromString(str: string) {
 
@@ -36,5 +38,5 @@ export default class WordResult {
     const uniqueStrSet = new Set(arr);
 
     return new Set([...uniqueStrSet].map(str => WordResult.fromString(str)));
-  };
+  }; */
 };

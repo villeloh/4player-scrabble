@@ -3,6 +3,7 @@ import { useState, MouseEvent, useEffect } from 'react';
 import LetterObj from 'model/LetterObj';
 import WordResult from 'model/WordResult';
 import { MULTIPLIER } from 'model/TileObj';
+import { ValueSet } from './types';
 
 // TODO: think about using useReducer() in some hooks
 
@@ -237,7 +238,9 @@ export function useBoard(addLettersToRack: Function) {
     let checkForCenterTile = isFirstPlay;
     let centerTileIncluded = false;
 
-    let words = new Set<WordResult>();
+    // the custom ValueSet class ensures no duplicates of 
+    // added objects (which WordResult qualifies as)
+    let words = new ValueSet<WordResult>();
 
     newBoardLetters.forEach((_, id) => {
 
@@ -270,9 +273,6 @@ export function useBoard(addLettersToRack: Function) {
       throw new Error(BOARD_ERROR.INCLUDE_CENTER);
     }
 
-    // even though it is a Set, comparison by reference means there can be duplicates
-    words = WordResult.removeDuplicateValues(words);
-
     let points = [...words].map(wordResult => wordResult.points).reduce((prev, curr) => prev + curr);
 
     let hasBonus = false;
@@ -280,7 +280,7 @@ export function useBoard(addLettersToRack: Function) {
       points += 50; // using all 7 letters at once gives 50 bonus points
       hasBonus = true;
     }
-    const wordsToReturn = [...words].map(wordResult => wordResult.word);
+    const wordsToReturn = words.mapToArray(wordResult => wordResult.word);
 
     return { words: wordsToReturn, points, hasBonus };
   };

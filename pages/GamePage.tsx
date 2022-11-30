@@ -34,6 +34,7 @@ const GamePage: NextPage = () => {
 
   // TODO: browser refresh resets the letters; fix it (with LocalStorage?)
   useEffect(() => {
+
     // infinite rerender loop if we don't call this initially in useEffect()
     refillRack();
   }, []);
