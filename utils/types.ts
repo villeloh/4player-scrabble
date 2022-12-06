@@ -5,32 +5,42 @@ export class ValueSet<T> extends Set<T> {
     super(args);
   }
 
-  // 3 for-loops and 3 ifs is pretty bad, but these should be small objects
-  add(item: T): this {
+  add(item: T) {
+    if (this._hasByValue(item)) {
+      return this;
+    }
 
-    // make Set add() method use value comparison for objects
-    if (item === Object(item)) {
+    super.add(item);
+    return this;
+  }
 
-      for (const setItem of this) {
-
-        let allValuesIdentical = true;
-
-        for (const key in setItem) {
-          for (const key2 in item) {
-            if (key === key2) {
-              if ((setItem as any)[key] !== (item as any)[key2]) {
-                allValuesIdentical = false;
-                break;
-              }
-            }
-          }
-        }
-        // i.e., do not add the value-identical item
-        if (allValuesIdentical) return this;
+  _hasByValue(newItem: T) {
+    for (const item of this) {
+      if (this._isEqual(item, newItem)) {
+        return true;
       }
     }
-    super.add(item); // add the non-value-identical item
-    return this;
+    return false;
+  }
+
+  _isEqual(obj1: any, obj2: any) {
+
+    const keys1 = Object.keys(obj1);
+    const keys2 = Object.keys(obj2);
+
+    // If the objects have different numbers of keys, they can't be equal.
+    if (keys1.length !== keys2.length) {
+      return false;
+    }
+
+    // Check if the objects have the same keys and values for those keys.
+    for (const key of keys1) {
+      if (obj1[key] !== obj2[key]) {
+        return false;
+      }
+    }
+    // If all the keys and values are the same, the objects are equal.
+    return true;
   }
 
   // adding a missing map() method to JS Set
