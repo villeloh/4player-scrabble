@@ -14,7 +14,7 @@ export class ValueSet<T> extends Set<T> {
     return this;
   }
 
-  _hasByValue(newItem: T) {
+  private _hasByValue(newItem: T) {
     for (const item of this) {
       if (this._isEqual(item, newItem)) {
         return true;
@@ -23,7 +23,7 @@ export class ValueSet<T> extends Set<T> {
     return false;
   }
 
-  _isEqual(obj1: any, obj2: any) {
+  private _isEqual(obj1: any, obj2: any) {
 
     const keys1 = Object.keys(obj1);
     const keys2 = Object.keys(obj2);
