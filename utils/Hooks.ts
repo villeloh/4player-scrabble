@@ -226,6 +226,7 @@ export function useBoard(addLettersToRack: Function) {
   };
 
   // TODO: tidy this up somehow
+  // TODO: throwing is bad form for regular operations; return Errors instead
   const getRuleVerifiedWordsAndPoints = () => {
 
     try {

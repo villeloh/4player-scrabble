@@ -44,12 +44,12 @@ export class ValueSet<T> extends Set<T> {
   }
 
   // adding a missing map() method to JS Set
-  map(callback: (value: T, index?: number, arr?: T[]) => unknown) {
-    return new ValueSet(...[...this].map(callback));
+  map<U>(callback: (value: T, index?: number, arr?: T[]) => U) {
+    return new ValueSet<U>(...[...this].map(callback));
   }
 
   // for convenience
-  mapToArray(callback: (value: T, index?: number, arr?: T[]) => unknown) {
+  mapToArray<U>(callback: (value: T, index?: number, arr?: T[]) => U) {
     return [...this].map(callback);
   }
 };
