@@ -119,8 +119,19 @@ const GamePage: NextPage = () => {
     let isError = false;
 
     let bonus = false;
-    try {
-      const { words, points, hasBonus } = getRuleVerifiedWordsAndPoints();
+
+    const result = getRuleVerifiedWordsAndPoints();
+
+    if (result instanceof Error) {
+      const err = result as Error;
+      console.log(err.message);
+      reRackBoardLetters();
+
+      msgToDisplay = err.message;
+      isError = true;
+    } else {
+
+      const { words, points, hasBonus } = result;
       console.log(words);
       console.log('points: ', points);
 
@@ -138,15 +149,8 @@ const GamePage: NextPage = () => {
       // TODO: rerack letters and pass turn on verif. failure
       // TODO: rerack blank letters with their selected value upon verif. failure
       // (set letter.isCharLocked = true for this)
-
-    } catch (error) {
-      const err = error as Error;
-      console.log(err.message);
-      reRackBoardLetters();
-
-      msgToDisplay = err.message;
-      isError = true;
     }
+
     if (msgToDisplay) {
       displayModal(msgToDisplay, 2500, isError).then(_ => {
         if (bonus) {

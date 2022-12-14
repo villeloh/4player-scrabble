@@ -9,6 +9,7 @@ type CursorProps = {
 
 export default function Cursor({ children, mouseX, mouseY }: CursorProps) {
 
+  // TODO: sort out the issue where the letter placement differs based on display dimensions
   // for some reason, the rendered item is off-center to start with
   const yOffset = 22;
   const xOffset = 22;

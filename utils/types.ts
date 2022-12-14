@@ -53,3 +53,8 @@ export class ValueSet<T> extends Set<T> {
     return [...this].map(callback);
   }
 };
+
+export type ValidationResult = {
+  valid: Boolean;
+  error?: Error;
+};

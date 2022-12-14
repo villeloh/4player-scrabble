@@ -3,7 +3,7 @@ import { useState, MouseEvent, useEffect } from 'react';
 import LetterObj from 'model/LetterObj';
 import WordResult from 'model/WordResult';
 import { MULTIPLIER } from 'model/TileObj';
-import { ValueSet } from './types';
+import { ValidationResult, ValueSet } from './types';
 
 // TODO: think about using useReducer() in some hooks
 
@@ -226,14 +226,12 @@ export function useBoard(addLettersToRack: Function) {
   };
 
   // TODO: tidy this up somehow
-  // TODO: throwing is bad form for regular operations; return Errors instead
   const getRuleVerifiedWordsAndPoints = () => {
 
-    try {
-      // TODO: validation continues after this, so the name is not ideal
-      _validateNewLetterPlacement();
-    } catch (error) {
-      throw error as Error;
+    const result = _validateNewLetterPlacement();
+
+    if (!result.valid) {
+      return result.error!; // 're-throw' the error
     }
 
     let checkForCenterTile = isFirstPlay;
@@ -243,7 +241,7 @@ export function useBoard(addLettersToRack: Function) {
     // added objects (which WordResult qualifies as)
     let words = new ValueSet<WordResult>();
 
-    newBoardLetters.forEach((_, id) => {
+    for (let [id, _] of newBoardLetters) {
 
       if (checkForCenterTile) {
         if (tiles.get(id)?.bonus === 'CENTER') {
@@ -260,7 +258,7 @@ export function useBoard(addLettersToRack: Function) {
       const vertLengthOk = vertical.word.length > 1;
 
       if (!horizLengthOk && !vertLengthOk) {
-        throw new Error(BOARD_ERROR.NO_DANGLING);
+        return new Error(BOARD_ERROR.NO_DANGLING);
       }
       if (horizLengthOk) {
         words.add(horizontal);
@@ -268,10 +266,10 @@ export function useBoard(addLettersToRack: Function) {
       if (vertLengthOk) {
         words.add(vertical);
       }
-    }); // end forEach
+    } // end for
 
     if (isFirstPlay && !centerTileIncluded) {
-      throw new Error(BOARD_ERROR.INCLUDE_CENTER);
+      return new Error(BOARD_ERROR.INCLUDE_CENTER);
     }
 
     let points = [...words].map(wordResult => wordResult.points).reduce((prev, curr) => prev + curr);
@@ -296,7 +294,7 @@ export function useBoard(addLettersToRack: Function) {
     newBoardLetters.forEach((letterObj, tileId) => {
 
       if (letterObj.char === '') {
-        throw new Error(BOARD_ERROR.NO_BLANK);
+        return { valid: false, error: new Error(BOARD_ERROR.NO_BLANK) } as ValidationResult;
       }
 
       // we need actual coordinates to easily do the needed operations
@@ -332,7 +330,7 @@ export function useBoard(addLettersToRack: Function) {
           // any gaps between the new letters need to have 'old' board letters in them
           if (!oldBoardLetters.has(id)) {
             // early return is a bit unclear, but just to make this *slightly* more efficient
-            throw new Error(BOARD_ERROR.NO_GAPS);
+            return { valid: false, error: new Error(BOARD_ERROR.NO_GAPS) } as ValidationResult;
           }
         });
       }
@@ -358,7 +356,7 @@ export function useBoard(addLettersToRack: Function) {
           // any gaps between the new letters need to have 'old' board letters in them
           if (!oldBoardLetters.has(id)) {
             // early return is a bit unclear, but just to make this *slightly* more efficient
-            throw new Error(BOARD_ERROR.NO_GAPS);
+            return { valid: false, error: new Error(BOARD_ERROR.NO_GAPS) } as ValidationResult;
           }
         });
       }
@@ -366,7 +364,7 @@ export function useBoard(addLettersToRack: Function) {
 
     // the letters must be in a straight line either vertically or horizontally
     if (!(xIdentical || yIdentical)) {
-      throw new Error(BOARD_ERROR.NO_ANGLES);
+      return { valid: false, error: new Error(BOARD_ERROR.NO_ANGLES) } as ValidationResult;
     }
 
     if (!isFirstPlay) {
@@ -384,9 +382,11 @@ export function useBoard(addLettersToRack: Function) {
         if (hasAdjacentOldLetter) break;
       }
       if (!hasAdjacentOldLetter) {
-        throw new Error(BOARD_ERROR.TOUCH_OLD_WORD);
+        return { valid: false, error: new Error(BOARD_ERROR.TOUCH_OLD_WORD) } as ValidationResult;
       }
-    } // end if
+    }
+
+    return { valid: true } as ValidationResult;
   };
 
   // could be part of useRack as well; matter of taste
