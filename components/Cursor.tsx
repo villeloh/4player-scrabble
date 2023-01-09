@@ -9,16 +9,12 @@ type CursorProps = {
 
 export default function Cursor({ children, mouseX, mouseY }: CursorProps) {
 
-  // TODO: sort out the issue where the letter placement differs based on display dimensions
-  // for some reason, the rendered item is off-center to start with
-  const yOffset = 22;
-  const xOffset = 22;
-
   const cursorRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    cursorRef.current!.style.top = `${mouseY - yOffset}px`;
-    cursorRef.current!.style.left = `${mouseX - xOffset}px`;
+    cursorRef.current!.style.top = `${mouseY}px`;
+    cursorRef.current!.style.left = `${mouseX}px`;
+    cursorRef.current!.style.transform = 'translate(-50%, -50%)'; // center the Letter on the cursor
   }, [mouseX, mouseY]);
 
   return (
