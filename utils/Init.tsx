@@ -1,5 +1,5 @@
 import LetterObj from 'model/LetterObj';
-import TileObj, { TileBonus } from 'model/TileObj';
+import TileObj from 'model/TileObj';
 
 export function initTiles(): Map<number, TileObj> {
 
@@ -252,7 +252,7 @@ export function initTiles(): Map<number, TileObj> {
 
 export function initLetters(): LetterObj[] {
 
-  let id = 300; // to stop conflict with Tiles when using them as React keys
+  let id = 300; // to stop conflict with Tiles when using the ids as React keys
 
   return [
     new LetterObj(id++, 'A', 1),

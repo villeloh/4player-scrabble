@@ -1,3 +1,4 @@
+import { STYLES } from "utils/globals";
 import UIButton from "./UIButton";
 
 type ExchangeButtonProps = {
@@ -14,8 +15,8 @@ export default function ExchangeButtons({
   handleCancelClick, handleExchangeClick,
   canExchange, canActivate }: ExchangeButtonProps) {
 
-  const cancelBtnColor = 'bg-red-400';
-  const exchangeBtnColor = 'bg-green-500';
+  const cancelBtnColor = STYLES.btnColorCancel;
+  const exchangeBtnColor = STYLES.btnColorGreen;
 
   const exchangeBtnOrEmpty = canActivate ? <UIButton text="Exchange Letters" handleClick={handleActivateClick} /> : <div></div>;
 

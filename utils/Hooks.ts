@@ -575,6 +575,19 @@ export function useTimer(durationMS: number, callback: Function) {
   return startTimer;
 };
 
+export function usePeriodicCall(intervalMS: number, callback: Function) {
+
+  const startPeriodicCall = () => {
+    return new Promise(resolve => {
+      setInterval(() => {
+
+        return resolve(callback());
+      }, intervalMS);
+    });
+  };
+  return startPeriodicCall;
+};
+
 // ==================== HELPERS =======================================================
 
 // a bad consequence of storing the tileIds as a Map is the lack of a 'real' index

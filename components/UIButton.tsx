@@ -1,3 +1,4 @@
+import { STYLES } from "utils/globals";
 
 type UIButtonProps = {
   text?: string;
@@ -6,9 +7,9 @@ type UIButtonProps = {
   enabled?: boolean;
 };
 
-export default function UIButton({ text, handleClick, color = 'bg-slate-400', enabled = true }: UIButtonProps) {
+export default function UIButton({ text, handleClick, color = STYLES.btnColorDefault, enabled = true }: UIButtonProps) {
 
-  const disabledColor = 'bg-gray-300';
+  const disabledColor = STYLES.btnColorDisabled;
   const btnColor = enabled ? color : disabledColor;
 
   return (

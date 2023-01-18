@@ -142,7 +142,7 @@ const GamePage: NextPage = () => {
       lockBoardLetters();
 
       msgToDisplay = `Played words: ${words.join(', ')} ! Points: +${points} !`;
-      // TODO: draw new letters from pouch and pass turn on verif. success
+      // TODO: call refillRack() and pass turn on verif. success
       // TODO: increase player's score
       // TODO: check for victory
 
@@ -161,6 +161,7 @@ const GamePage: NextPage = () => {
     }
   };
 
+  // TODO: useModal hook could exist
   const displayModal = async (text: string, durationMS: number, isError: boolean = false) => {
 
     setModalData({ text, isError });
