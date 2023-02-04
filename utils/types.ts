@@ -58,3 +58,9 @@ export type ValidationResult = {
   valid: Boolean;
   error?: Error;
 };
+
+export type GameInfo = {
+  name: string;
+  currentPlayers: number;
+  maxPlayers: number;
+};

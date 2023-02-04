@@ -1,12 +1,12 @@
 import { initLetters, initTiles } from './init';
-import { useState, MouseEvent, useEffect } from 'react';
+import { useState, MouseEvent, useEffect, useRef } from 'react';
 import LetterObj from 'model/LetterObj';
 import WordResult from 'model/WordResult';
 import { MULTIPLIER } from 'model/TileObj';
 import { ValidationResult, ValueSet } from './types';
+import { PlayerColors, STYLES } from './globals';
 
 // TODO: think about using useReducer() in some hooks
-// TODO: figure out a way to change the casing of this file to 'hooks.ts' (some kind of TS linking issue prevents it atm)
 
 export function useMouseMove() {
 
@@ -590,6 +590,28 @@ export function usePeriodicCall(intervalMS: number, callback: Function) {
 };
 
 // ==================== HELPERS =======================================================
+
+// TODO: color could be its own type, but it's not a huge deal
+// TODO: check for empty input array maybe
+export const useGetRandomColor = (colors: string[]) => {
+
+  // useRef instead of useState to avoid unnecessary re-renders
+  // TODO: check if other spots could be improved like this !
+  const unPickedColors = useRef(colors);
+
+  const getRandomColor = () => {
+    if (unPickedColors.current.keys.length === 1) {
+      return unPickedColors.current[0];
+    }
+
+    const index = Math.floor(Math.random() * unPickedColors.current.length);
+    const pickedColor = unPickedColors.current[index];
+    unPickedColors.current = unPickedColors.current.filter((_, i) => i !== index);
+    return pickedColor;
+  };
+
+  return getRandomColor;
+};
 
 // a bad consequence of storing the tileIds as a Map is the lack of a 'real' index
 const _getXindexFromTileId = (id: number) => {

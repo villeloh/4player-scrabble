@@ -1,29 +1,22 @@
 import CreateGameForm from "components/CreateGameForm";
+import GameList from "components/GameList";
 import JoinGameForm from "components/JoinGameForm";
-import UIButton from "components/UIButton";
 import { NextPage } from "next";
 import Head from "next/head";
 import { useState } from "react";
 import { APP_TITLE, MAX_GAME_NAME_LENGTH, MAX_GAME_PW_LENGTH, MIN_GAME_NAME_LENGTH, MIN_GAME_PW_LENGTH } from "utils/globals";
+import { GameInfo } from "utils/types";
 
 const StartPage: NextPage = () => {
 
   const pageTitle = APP_TITLE;
   const welcomeText = 'Welcome to 4-P Scrabble!';
 
-  const [joinBtnDirty, setJoinBtnDirty] = useState(false);
-  const [createBtnDirty, setCreateBtnDirty] = useState(false);
+  // TODO: fetch the game list from the server on page load & update periodically
+  const [games, setGames] = useState<GameInfo[] | null>(null);
+  const [selectedGame, setSelectedGame] = useState<GameInfo | null>(null);
 
-  const [showJoinForm, setShowJoinForm] = useState(false);
-  const [showCreateForm, setShowCreateForm] = useState(false);
-
-  const btnTextCancel = 'Cancel';
-  const btnTextJoin = 'Join Game';
-  const btnTextCreate = 'Create Game';
-
-  const [joinBtnText, setJoinBtnText] = useState(btnTextJoin);
-  const [createBtnText, setCreateBtnText] = useState(btnTextCreate);
-
+  /* // TODO: delete these eventually (should not be needed)
   const handleCreateGameBtnClick = () => {
 
     // i.e., we cancel the creation by clicking 'Cancel'
@@ -52,7 +45,7 @@ const StartPage: NextPage = () => {
       setJoinBtnText(btnTextCancel); // the 'send' button is in the form itself
       setShowJoinForm(true);
     }
-  };
+  }; */
 
   const joinGame = (gameName: string, passWord: string) => {
 
@@ -63,6 +56,11 @@ const StartPage: NextPage = () => {
   const createGame = (gameName: string, passWord: string, numOfPlayers: number) => {
 
     // TODO: call server method to create game; display 'wait' modal
+  };
+
+  const onGameClick = (game: GameInfo) => {
+
+    setSelectedGame(game);
   };
 
   // only the latest reason for invalidity will be displayed, but it's good enough
@@ -113,12 +111,11 @@ const StartPage: NextPage = () => {
       <h1>{welcomeText}</h1>
       <div className="flex flex-col">
         <div>
-          <UIButton text={createBtnText} handleClick={handleCreateGameBtnClick} />
-          {showCreateForm && <CreateGameForm onSubmit={createGame} validators={createGameFormValidators} />}
+          <CreateGameForm onSubmit={createGame} validators={createGameFormValidators} />
         </div>
         <div>
-          <UIButton text={joinBtnText} handleClick={handleJoinGameBtnClick} />
-          {showJoinForm && <JoinGameForm onSubmit={joinGame} />}
+          {selectedGame && <JoinGameForm onSubmit={joinGame} game={selectedGame} />}
+          <GameList games={games} onGameClick={onGameClick} />
         </div>
       </div>
     </div>

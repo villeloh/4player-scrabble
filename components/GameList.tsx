@@ -1,11 +1,8 @@
+import { GameInfo } from "utils/types";
 
 type GameListProps = {
-  games: {
-    name: string,
-    maxPlayers: number,
-    currentPlayers: number
-  }[];
-  onGameClick: (gameName: string) => void;
+  games: GameInfo[] | null;
+  onGameClick: (game: GameInfo) => void;
 };
 
 export default function GameList({ games, onGameClick }: GameListProps) {
@@ -16,9 +13,9 @@ export default function GameList({ games, onGameClick }: GameListProps) {
   return (
     <div className='m-2'>
       <ul>
-        {games.map(game => {
-          return <li className='mt-1' onClick={() => onGameClick(game.name)}>
-            {`Game: ${game.name} (${game.currentPlayers}/${game.maxPlayers} players)`}
+        {games?.map(game => {
+          return <li className='mt-1' onClick={() => onGameClick({ name: game.name, currentPlayers: game.currentPlayers, maxPlayers: game.maxPlayers })}>
+            {`${game.name} | ${game.currentPlayers}/${game.maxPlayers} players`}
           </li>;
         })}
       </ul>

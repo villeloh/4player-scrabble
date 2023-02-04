@@ -21,10 +21,11 @@ export default function CreateGameForm({ onSubmit, validators }: CreateGameFormP
   const [numOfPlayers, setNumOfPlayers] = useState(2);
   const { isFormValid, reasonFormInvalid } = useFormValidation(gameName, passWord, validators);
 
+  const title = 'Create Game';
   const nameLabel = 'Enter game name (letters and numbers only):';
   const pwLabel = 'Enter password (any characters):';
-  const submitLabel = 'Create Game';
-  const playerNumSelectLabel = 'Choose the number of players:';
+  const submitLabel = 'Launch';
+  const playerNumSelectLabel = '# of players:';
 
   const playerNumSelect = <label>
     {playerNumSelectLabel}
@@ -54,6 +55,7 @@ export default function CreateGameForm({ onSubmit, validators }: CreateGameFormP
 
   return (
     <div>
+      <h1>{title}</h1>
       <form>
         {!isFormValid && <Modal text={reasonFormInvalid} isError={true} />}
         <label>
