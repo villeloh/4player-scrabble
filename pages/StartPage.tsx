@@ -1,4 +1,5 @@
-import GameSetupForm from "components/GameSetupForm";
+import CreateGameForm from "components/CreateGameForm";
+import JoinGameForm from "components/JoinGameForm";
 import UIButton from "components/UIButton";
 import { NextPage } from "next";
 import Head from "next/head";
@@ -53,7 +54,6 @@ const StartPage: NextPage = () => {
     }
   };
 
-  // the arguments have been checked for validity at this point
   const joinGame = (gameName: string, passWord: string) => {
 
     // TODO: call server method to join game; display 'wait' modal
@@ -66,7 +66,8 @@ const StartPage: NextPage = () => {
   };
 
   // only the latest reason for invalidity will be displayed, but it's good enough
-  const gameFormValidators = {
+  // TODO: assign the right type to the validators somehow
+  const createGameFormValidators = {
 
     isGameNameValid(name: string) {
 
@@ -92,14 +93,11 @@ const StartPage: NextPage = () => {
 
       let reasonFormInvalid;
 
-      // TODO: make a list of forbidden characters
-
       const lengthOk = pw.length >= MIN_GAME_PW_LENGTH && pw.length <= MAX_GAME_PW_LENGTH;
 
       if (!lengthOk) {
         reasonFormInvalid = `Error: Game Password must be ${MIN_GAME_PW_LENGTH}-${MAX_GAME_PW_LENGTH} characters.`;
       }
-
       const isValid = lengthOk;
 
       return { isValid, reasonFormInvalid };
@@ -116,11 +114,11 @@ const StartPage: NextPage = () => {
       <div className="flex flex-col">
         <div>
           <UIButton text={createBtnText} handleClick={handleCreateGameBtnClick} />
-          {showCreateForm && <GameSetupForm createOrJoin="create" onSubmit={createGame} validators={gameFormValidators} />}
+          {showCreateForm && <CreateGameForm onSubmit={createGame} validators={createGameFormValidators} />}
         </div>
         <div>
           <UIButton text={joinBtnText} handleClick={handleJoinGameBtnClick} />
-          {showJoinForm && <GameSetupForm createOrJoin="join" onSubmit={joinGame} validators={gameFormValidators} />}
+          {showJoinForm && <JoinGameForm onSubmit={joinGame} />}
         </div>
       </div>
     </div>

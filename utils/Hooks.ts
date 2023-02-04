@@ -6,6 +6,7 @@ import { MULTIPLIER } from 'model/TileObj';
 import { ValidationResult, ValueSet } from './types';
 
 // TODO: think about using useReducer() in some hooks
+// TODO: figure out a way to change the casing of this file to 'hooks.ts' (some kind of TS linking issue prevents it atm)
 
 export function useMouseMove() {
 

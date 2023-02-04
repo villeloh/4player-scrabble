@@ -10,9 +10,10 @@ enum GameState {
 // Server-side object that is kept in memory
 export default class Game {
 
-  static readonly MIN_PLAYERS = 2;
-  static readonly MAX_PLAYERS = 4;
+  private static readonly _MIN_PLAYERS = 2;
+  private static readonly _MAX_PLAYERS = 4;
 
+  // TODO: could the new TS accessor syntax be used here?
   private _players: Player[] = [];
   private _playerOrder?: PlayerOrder;
   private _activePlayer?: Player;
@@ -26,7 +27,7 @@ export default class Game {
 
   start() {
 
-    if (this._players.length < Game.MIN_PLAYERS) return;
+    if (this._players.length < Game._MIN_PLAYERS) return;
 
     this._playerOrder = new PlayerOrder(this._players);
 
@@ -59,7 +60,7 @@ export default class Game {
 
   addPlayer(player: Player) {
 
-    if (this._players.length === Game.MAX_PLAYERS) return;
+    if (this._players.length === Game._MAX_PLAYERS) return;
 
     this._players.push(player);
   }
