@@ -7,9 +7,10 @@ type UIButtonProps = {
   enabled?: boolean;
 };
 
-export default function UIButton({ text, handleClick, color = STYLES.btnColorDefault, enabled = true }: UIButtonProps) {
+// Tailwind bug causes the button colors to be lost if they're imported from globals.ts -.-
+export default function UIButton({ text, handleClick, color = 'bg-slate-400', enabled = true }: UIButtonProps) {
 
-  const disabledColor = STYLES.btnColorDisabled;
+  const disabledColor = 'bg-gray-300';
   const btnColor = enabled ? color : disabledColor;
 
   return (

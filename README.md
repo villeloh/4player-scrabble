@@ -1,27 +1,25 @@
-# Next.js + Tailwind CSS Example
+# Online 4-player Scrabble game with Next.js + Tailwind.css
 
-This example shows how to use [Tailwind CSS](https://tailwindcss.com/) [(v3.2)](https://tailwindcss.com/blog/tailwindcss-v3-2) with Next.js. It follows the steps outlined in the official [Tailwind docs](https://tailwindcss.com/docs/guides/nextjs).
+In its finished state, this project will allow 2-4 players to play Scrabble online. (Currently only two-player Scrabble platforms are available for some reason.)
 
-## Deploy your own
+## State of the project
 
-Deploy the example using [Vercel](https://vercel.com?utm_source=github&utm_medium=readme&utm_campaign=next-example) or preview live with [StackBlitz](https://stackblitz.com/github/vercel/next.js/tree/canary/examples/with-tailwindcss)
+For now, the project is in a half-finished state; the game starts on the 'game page' with only one player present. Browser refresh will reset the game state, allowing for a test of basic Scrabble functionality.
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/git/external?repository-url=https://github.com/vercel/next.js/tree/canary/examples/with-tailwindcss&project-name=with-tailwindcss&repository-name=with-tailwindcss)
+In its finished state, the app will have a starting page with 'Create Game' and 'Join Game' UI flows. The game creator will specify the desired number of players, name the game and set a password; once enough players have joined, the game will transition to the game page. Once the letter pouch is empty and one player has used all their letters, the game will end (as per standard Scrabble rules). Word validity will be checked via a free online dictionary API.
 
-## How to use
+No accounts, achievements, etc are planned, even for the final version. The aim is to make a very simple app that allows for a casual 4-player Scrabble game.
 
-Execute [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app) with [npm](https://docs.npmjs.com/cli/init), [Yarn](https://yarnpkg.com/lang/en/docs/cli/create/), or [pnpm](https://pnpm.io) to bootstrap the example:
+## Testing the app
 
-```bash
-npx create-next-app --example with-tailwindcss with-tailwindcss-app
-```
+If you want to see / test the app UI, it can be done as follows:
 
-```bash
-yarn create next-app --example with-tailwindcss with-tailwindcss-app
-```
+1. Download / git clone the project.
 
-```bash
-pnpm create next-app --example with-tailwindcss with-tailwindcss-app
-```
+2. In the main folder, run 'npm install' via command line.
 
-Deploy it to the cloud with [Vercel](https://vercel.com/new?utm_source=github&utm_medium=readme&utm_campaign=next-example) ([Documentation](https://nextjs.org/docs/deployment)).
+3. Then run 'npm run dev'. A browser window should open, showing the app UI. You can place letters and verify that the app conforms to standard Scrabble logic (first word has to include the center tile; no angles within words; etc).
+
+## Screenshot
+
+![Screenshot](screenshot_1.png)
