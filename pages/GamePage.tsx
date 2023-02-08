@@ -32,7 +32,7 @@ const GamePage: NextPage = () => {
 
   const { mouseX, mouseY, handleMouseMove } = useMouseMove();
 
-  // TODO: browser refresh resets the letters; fix it (with LocalStorage?)
+  // TODO: browser refresh resets the letters; fix it (with server requests)
   useEffect(() => {
 
     // infinite rerender loop if we don't call this initially in useEffect()
@@ -62,7 +62,6 @@ const GamePage: NextPage = () => {
   };
 
   // TODO: prop drilling obfuscates the logic here
-  // TODO: possibly move this logic to the (already bloated) useBoard() hook
   const handleBlankLetterCharSelect = (tileId: number, selectedChar: string) => {
 
     const blankLetter = boardLetters.get(tileId)!;
@@ -70,6 +69,7 @@ const GamePage: NextPage = () => {
     addLetterOnBoard(tileId, newLetter); // replaces the old one
   };
 
+  // TODO: too many ifs here
   const handleRackSlotClick = (slotId: number, letter: LetterObj | undefined) => {
 
     if (letterExchangeMode && letter) {
@@ -138,16 +138,16 @@ const GamePage: NextPage = () => {
       bonus = hasBonus;
 
       // TODO: send request to verification API
-      // TODO: lock board letters only upon API verif. success
+      // TODO: lock board letters only upon API verification success
       lockBoardLetters();
 
       msgToDisplay = `Played words: ${words.join(', ')} ! Points: +${points} !`;
-      // TODO: call refillRack() and pass turn on verif. success
+      // TODO: call refillRack() and pass turn on verification success
       // TODO: increase player's score
       // TODO: check for victory
 
-      // TODO: rerack letters and pass turn on verif. failure
-      // TODO: rerack blank letters with their selected value upon verif. failure
+      // TODO: rerack letters and pass turn on verification failure
+      // TODO: rerack blank letters with their selected value upon verification failure
       // (set letter.isCharLocked = true for this)
     }
 

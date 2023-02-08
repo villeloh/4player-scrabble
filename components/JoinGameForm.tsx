@@ -17,12 +17,11 @@ export default function JoinGameForm({ onSubmit, game }: JoinGameFormProps) {
 
   const [passWord, setPassWord] = useState('');
 
-  let joinBtnEnabled = false;
+  const [joinBtnEnabled, setJoinBtnEnabled] = useState(false);
 
-  // does it work with a plain boolean?
   useEffect(() => {
-    joinBtnEnabled = passWord.length >= MIN_GAME_PW_LENGTH && passWord.length <= MAX_GAME_PW_LENGTH && game.currentPlayers < game.maxPlayers;
-  }, [passWord, game]); // not sure if the 'game' part works due to shallow vs. deep issues
+    setJoinBtnEnabled(passWord.length >= MIN_GAME_PW_LENGTH && passWord.length <= MAX_GAME_PW_LENGTH && game.currentPlayers < game.maxPlayers);
+  }, [passWord, game]); // not sure if the 'game' part will work due to shallow vs. deep object issues
 
   return (
     <div>

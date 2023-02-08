@@ -1,6 +1,7 @@
 import { STYLES } from "utils/globals";
 import UIButton from "./UIButton";
 
+// TODO: think of better names for canExchange and canActivate
 type ExchangeButtonProps = {
   letterExchangeMode: boolean;
   handleActivateClick: Function;

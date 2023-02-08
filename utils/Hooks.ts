@@ -4,7 +4,6 @@ import LetterObj from 'model/LetterObj';
 import WordResult from 'model/WordResult';
 import { MULTIPLIER } from 'model/TileObj';
 import { ValidationResult, ValueSet } from './types';
-import { PlayerColors, STYLES } from './globals';
 
 // TODO: think about using useReducer() in some hooks
 
@@ -445,11 +444,6 @@ export function useLetterPouch() {
     return newLetters;
   };
 
-  // TODO: remove this when it's sure the Pouch works correctly at all times
-  useEffect(() => {
-    console.log('Letters in Pouch: ', letterPouch.length);
-  }, [letterPouch]);
-
   return {
     letterPouch,
     takeLettersFromPouch,
@@ -457,8 +451,6 @@ export function useLetterPouch() {
   };
 };
 
-// passing references to other stateful objects to the hook seems like bad form; think of other solutions.
-// Conversely: maybe the state of exchanged letters should be moved here?
 export function useRack(
   letterPouch: LetterObj[],
   takeLettersFromPouch: (amount: number) => LetterObj[],

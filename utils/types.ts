@@ -1,4 +1,7 @@
 
+// TODO: consider moving these to their most relevant use sites
+
+// technically a class, but it fits the best here
 export class ValueSet<T> extends Set<T> {
 
   constructor(...args: T[]) {

@@ -4,7 +4,10 @@ import JoinGameForm from "components/JoinGameForm";
 import { NextPage } from "next";
 import Head from "next/head";
 import { useState } from "react";
-import { APP_TITLE, MAX_GAME_NAME_LENGTH, MAX_GAME_PW_LENGTH, MIN_GAME_NAME_LENGTH, MIN_GAME_PW_LENGTH } from "utils/globals";
+import {
+  APP_TITLE, MAX_GAME_NAME_LENGTH, MAX_GAME_PW_LENGTH,
+  MIN_GAME_NAME_LENGTH, MIN_GAME_PW_LENGTH
+} from "utils/globals";
 import { GameInfo } from "utils/types";
 
 const StartPage: NextPage = () => {
@@ -15,37 +18,6 @@ const StartPage: NextPage = () => {
   // TODO: fetch the game list from the server on page load & update periodically
   const [games, setGames] = useState<GameInfo[] | null>(null);
   const [selectedGame, setSelectedGame] = useState<GameInfo | null>(null);
-
-  /* // TODO: delete these eventually (should not be needed)
-  const handleCreateGameBtnClick = () => {
-
-    // i.e., we cancel the creation by clicking 'Cancel'
-    if (createBtnDirty) {
-
-      setCreateBtnDirty(false);
-      setCreateBtnText(btnTextCreate);
-      setShowCreateForm(false);
-    } else {
-      setCreateBtnDirty(true);
-      setCreateBtnText(btnTextCancel); // the 'send' button is in the form itself
-      setShowCreateForm(true);
-    }
-  };
-
-  const handleJoinGameBtnClick = () => {
-
-    // i.e., we cancel the joining by clicking 'Cancel'
-    if (joinBtnDirty) {
-
-      setJoinBtnDirty(false);
-      setJoinBtnText(btnTextJoin);
-      setShowJoinForm(false);
-    } else {
-      setJoinBtnDirty(true);
-      setJoinBtnText(btnTextCancel); // the 'send' button is in the form itself
-      setShowJoinForm(true);
-    }
-  }; */
 
   const joinGame = (gameName: string, passWord: string) => {
 

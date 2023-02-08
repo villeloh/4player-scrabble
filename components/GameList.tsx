@@ -8,7 +8,6 @@ type GameListProps = {
 export default function GameList({ games, onGameClick }: GameListProps) {
 
   // TODO: verify correct list scroll behaviour
-  // TODO: onGameClick() could take the player count as well, for display in the parent component
 
   return (
     <div className='m-2'>
